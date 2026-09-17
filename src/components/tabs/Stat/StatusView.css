@@ -9,71 +9,43 @@
   padding: 4px 0;
 }
 
-/* Composite container: body canvas (75x109) plus the head sticking out above
-   it. Layout values were derived from the actual sprite pixels (body/1.png and
-   head/1.png):
-     - Torso/waist axis: measured across ALL 8 walk frames on the shoulder V
-       (rows 3-16), the torso content centerline is x 37.0..38.6 (mean 37.94),
-       i.e. pressed against the body canvas centerline (37.5). The body's top
-       rows (0-4) carry a small "neck nub" at x~44-51 that the head overlaps,
-       so the stable reference for compositing is the TORSO centerline, not the
-       nub.
-     - Head is 38x51; its content (alpha-weighted centroid, i.e. the face) is
-       at x 17.64 in head-canvas space.
-   => face-over-torso alignment: head content cx 17.64 -> torso centerline 38,
-      so the head layer starts at (38-17.64)/75 = 26.8%.
-   Vertical: the head pivots at 50% 100%, so scale 0.8 keeps the neck root at
-   the bottom. Head bottom (row 50) lands on body row ~13 and the chin (head
-   row 43) on body row ~7, right at the shoulder line; the tapered neck tip is
-   hidden inside the shoulders and the jaw covers the neck nub, so there is no
-   floating gap and nothing peeks out from behind the head. Body occupies its
-   canvas starting at 38/147 = 25.85%.
-     - scale 0.8: face 38 -> 30.4px, ~0.79 of the mean shoulder width (38.6px)
-   The debug sliders (?debug=1) tune these three in real time:
-     x+=right, y+=down (screen design px), scale around the neck root. */
+/* Compositing canvas, in native artwork pixels: body 75x109 + the head's 48px
+   overhang, i.e. 75x157. The body sits at y=48 and everything else is
+   positioned from the anchors computed in StatusView.tsx (neck socket per body
+   frame / head-1 neck tip). No pixel values are hand-tuned here. */
 .status__character {
-  --status-head-offset-x: 0px;
-  --status-head-offset-y: 0px;
-  --status-head-scale: 0.8;
-
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   max-width: 100%;
   align-self: center;
   width: auto;
-  aspect-ratio: 75 / 147;
+  aspect-ratio: 75 / 157;
 }
 
-/* body/torso/legs: 109/147 from the top (shoulder line to the feet) */
-.status-layer--legs {
+/* Body: 109/157 tall, occupying the lower part of the canvas (48/157 is where
+   the body top sits, i.e. below the head overhang). */
+.status-layer--body {
   position: absolute;
-  top: 25.85%;
+  top: 30.57%;
   left: 0;
   width: 100%;
-  height: 74.15%;
-}
-
-/* head: 51/147 tall; left 26.8% puts the head's face centroid (x~17.64 of the
-   38px head canvas) on the torso centerline (x~38 of the 75px body canvas),
-   matching how the original Pip-Boy draws the head over the shoulders.
-   object-position left keeps the head left-anchored like the source frames
-   (head/4..7 use wider 39-40px canvases with all content at x=0..). */
-.status-layer--head {
-  position: absolute;
-  top: 0;
-  left: 26.8%;
-  width: 50.67%;
-  height: 34.69%;
+  height: 69.43%;
   display: block;
   object-fit: contain;
-  object-position: left top;
-  /* scale grows the head up from the neck root so it stays on the shoulders;
-     x/y offsets slide it in design px. */
-  transform:
-    translate(var(--status-head-offset-x), var(--status-head-offset-y))
-    scale(var(--status-head-scale));
-  transform-origin: 50% 100%;
+}
+
+/* Head: left/top/width/height come from measured neck anchors (see
+   StatusView.tsx). It must not be positioned by its left edge or face centroid
+   because head/1's canvas width is not stable relative to the body. */
+.status-layer--head {
+  position: absolute;
+  left: var(--status-head-left);
+  top: var(--status-head-top);
+  width: var(--status-head-width);
+  height: var(--status-head-height);
+  display: block;
+  object-fit: contain;
 }
 
 .status-mark {
@@ -84,10 +56,9 @@
   white-space: nowrap;
 }
 
-/* CABEZA tracks the head layer margin (37.33%) without overlapping the face */
 .status-mark--head {
-  top: 5%;
-  left: 38.5%;
+  top: 2%;
+  left: 40%;
 }
 
 .status-mark--arms {

@@ -1,6 +1,5 @@
 .screen {
-  /* Fill nearly the whole viewport; the remaining space below (12px gap +
-     the 28px power button + 12px bottom padding) is the physical switch. */
-  width: calc(100vw - 24px);
-  height: calc(100vh - 64px);
+  /* Diegetic fullscreen: the CRT fills the whole viewport, edge to edge. */
+  width: 100%;
+  height: 100%;
 }
