@@ -1,0 +1,44 @@
+.special-grid {
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 10px 14px;
+  padding: 8px 12px;
+}
+
+.special-cell {
+  width: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.special-cell:hover,
+.special-cell:focus-visible {
+  border-color: var(--pipboy-color-glow);
+  box-shadow: inset 0 0 8px var(--pipboy-color-deep);
+  outline: none;
+}
+
+.special-cell__sigla {
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  color: var(--pipboy-color-faint);
+}
+
+.special-cell__icon {
+  width: 62px;
+  height: 62px;
+}
+
+.special-cell__value {
+  font-size: 1.25rem;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
+}

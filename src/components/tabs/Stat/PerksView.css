@@ -1,0 +1,11 @@
+.perks {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.perks__title {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--pipboy-color-faint);
+}

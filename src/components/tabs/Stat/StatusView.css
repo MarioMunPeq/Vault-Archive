@@ -1,0 +1,108 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 4px 0;
+}
+
+.status__character {
+  /* --status-head-offset-x: desplaza la cabeza en horizontal. +mueve a la
+     derecha, - a la izquierda. Unidades: px de pantalla (no escaladas). */
+  --status-head-offset-x: 0px;
+  /* --status-head-offset-y: desplaza la cabeza en vertical. +baja, -sube
+     (mientras la escala venga de --status-head-scale). Unidades: px de pantalla. */
+  --status-head-offset-y: 0px;
+  /* --status-head-scale: escala el tamaño de la cabeza alrededor de su centro.
+     1 = tamaño base; 0.9 = 90%; 1.1 = 110%. Ajusta antes que los offsets. */
+  --status-head-scale: 1;
+
+  position: relative;
+  width: 128px;
+  height: 186px;
+}
+
+.status-layer--legs {
+  position: absolute;
+  inset: 0;
+}
+
+.status-layer--head {
+  position: absolute;
+  top: 0;
+  left: 23.3%;
+  width: 53.3%;
+  height: 46.8%;
+  transform:
+    translate(var(--status-head-offset-x), var(--status-head-offset-y))
+    scale(var(--status-head-scale));
+}
+
+.status-mark {
+  position: absolute;
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--pipboy-color-faint);
+  white-space: nowrap;
+}
+
+.status-mark--head {
+  top: 2%;
+  left: 4%;
+}
+
+.status-mark--arms {
+  top: 42%;
+  left: 2%;
+  writing-mode: vertical-rl;
+}
+
+.status-mark--torso {
+  top: 62%;
+  left: 8%;
+}
+
+.status-mark--legs {
+  top: 80%;
+  left: 22%;
+}
+
+.status__conditions {
+  display: flex;
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.status-condition {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.status-condition__icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px var(--pipboy-color-deep));
+}
+
+.status-condition__label {
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--pipboy-color-faint);
+}
+
+.status-condition__value {
+  font-size: 0.7rem;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 4px var(--pipboy-color-glow);
+}
+
+.status__name {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
+}

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { BootSequence } from './components/BootSequence/BootSequence'
 import { Screen } from './components/Screen/Screen'
+import { TabNav } from './components/TabNav/TabNav'
+import { Stat } from './components/tabs/Stat/Stat'
+import { StatusBar } from './components/StatusBar/StatusBar'
 import { usePowerState } from './hooks/usePowerState'
+import { useActiveTab } from './hooks/useActiveTab'
+import { playSfx } from './utils/sfx'
 import './App.css'
 
 import toggleSwitchSfx from './assets/sfx/toggle-switch.mp3'
@@ -29,22 +34,23 @@ const BOOT_FRAMES = [
 
 function App() {
   const { phase, isOn, toggle, completeBoot } = usePowerState()
+  const { tabs, activeTab, setActiveTab } = useActiveTab()
   const [crtEnabled] = useState(true)
 
   useEffect(() => {
     if (phase === 'turning-on') {
-      void new Audio(bootSequenceSfx).play()
+      playSfx(bootSequenceSfx)
     }
   }, [phase])
 
   useEffect(() => {
     if (phase === 'on') {
-      void new Audio(bootOkSfx).play()
+      playSfx(bootOkSfx)
     }
   }, [phase])
 
   const handlePowerPress = () => {
-    void new Audio(toggleSwitchSfx).play()
+    playSfx(toggleSwitchSfx)
     toggle()
   }
 
@@ -54,6 +60,26 @@ function App() {
         <Screen phase={phase} crtEnabled={crtEnabled}>
           {phase === 'turning-on' ? (
             <BootSequence frames={BOOT_FRAMES} onBootComplete={completeBoot} />
+          ) : phase === 'on' ? (
+            <div className="hud">
+              <TabNav
+                tabs={tabs}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+                label="Módulos"
+              />
+              <div className="hud__content">
+                {activeTab === 'STAT' ? (
+                  <Stat />
+                ) : (
+                  <div className="placeholder">
+                    <p className="placeholder__title">{activeTab}</p>
+                    <p className="placeholder__subtitle">MÓDULO EN CONSTRUCCIÓN</p>
+                  </div>
+                )}
+              </div>
+              <StatusBar />
+            </div>
           ) : (
             <div className="placeholder">
               <p className="placeholder__title">VAULT ARCHIVE</p>

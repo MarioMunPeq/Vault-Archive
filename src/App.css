@@ -12,6 +12,18 @@
     0 0 40px rgba(0, 0, 0, 0.8);
 }
 
+.hud {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.hud__content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .placeholder {
   height: 100%;
   display: grid;
@@ -26,6 +38,13 @@
   text-shadow:
     0 0 6px var(--pipboy-color-glow),
     0 0 24px var(--pipboy-color-deep);
+}
+
+.placeholder__subtitle {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  color: var(--pipboy-color-faint);
 }
 
 .power-button {

@@ -1,0 +1,11 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.stat__content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}

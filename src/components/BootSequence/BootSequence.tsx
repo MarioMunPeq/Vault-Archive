@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useFrameSequence } from '../../hooks/useFrameSequence'
 import './BootSequence.css'
 
 export interface BootSequenceProps {
@@ -12,33 +12,10 @@ export function BootSequence({
   frameIntervalMs = 180,
   onBootComplete,
 }: BootSequenceProps) {
-  const [frameIndex, setFrameIndex] = useState(0)
-  const completeRef = useRef(false)
-  const onBootCompleteRef = useRef(onBootComplete)
-
-  useEffect(() => {
-    onBootCompleteRef.current = onBootComplete
+  const frameIndex = useFrameSequence(frames.length, {
+    intervalMs: frameIntervalMs,
+    onComplete: onBootComplete,
   })
-
-  const lastIndex = frames.length - 1
-
-  useEffect(() => {
-    if (frameIndex < lastIndex) {
-      const id = window.setTimeout(
-        () => setFrameIndex((index) => index + 1),
-        frameIntervalMs,
-      )
-      return () => window.clearTimeout(id)
-    }
-
-    if (!completeRef.current) {
-      const id = window.setTimeout(() => {
-        completeRef.current = true
-        onBootCompleteRef.current?.()
-      }, frameIntervalMs)
-      return () => window.clearTimeout(id)
-    }
-  }, [frameIndex, lastIndex, frameIntervalMs])
 
   if (frames.length === 0) {
     return null
