@@ -1,15 +1,14 @@
 .app {
-  /* Everything below scales with --screen-scale (set at runtime) so the
-     screen, the gap and the power button grow proportionally together. */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(var(--app-gap) * var(--screen-scale));
-  padding: calc(var(--app-padding) * var(--screen-scale));
+  gap: 12px;
+  padding: 12px;
+  height: 100vh;
 }
 
 .app__screen {
-  width: fit-content;
+  width: 100%;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.06),
     0 0 40px rgba(0, 0, 0, 0.8);
@@ -54,8 +53,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--power-button-size) * var(--screen-scale));
-  height: calc(var(--power-button-size) * var(--screen-scale));
+  width: 28px;
+  height: 28px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   background: #17191d;

@@ -3,13 +3,7 @@ import type { CSSProperties } from 'react'
 import { SpriteLoop } from '../../SpriteLoop/SpriteLoop'
 import { HeadDebugPanel } from './HeadDebugPanel'
 import type { HeadValues } from './HeadDebugPanel'
-import headFrame1 from '../../../assets/images/stats/head/1.png'
-import headFrame2 from '../../../assets/images/stats/head/2.png'
-import headFrame3 from '../../../assets/images/stats/head/3.png'
-import headFrame4 from '../../../assets/images/stats/head/4.png'
-import headFrame5 from '../../../assets/images/stats/head/5.png'
-import headFrame6 from '../../../assets/images/stats/head/6.png'
-import headFrame7 from '../../../assets/images/stats/head/7.png'
+import headImage from '../../../assets/images/stats/head/1.png'
 import legsFrame1 from '../../../assets/images/stats/body/1.png'
 import legsFrame2 from '../../../assets/images/stats/body/2.png'
 import legsFrame3 from '../../../assets/images/stats/body/3.png'
@@ -23,16 +17,6 @@ import shieldIcon from '../../../assets/images/stats/shield.png'
 import radiationIcon from '../../../assets/images/stats/radiation.png'
 import helmetIcon from '../../../assets/images/stats/helmet.png'
 import './StatusView.css'
-
-const HEAD_FRAMES = [
-  headFrame1,
-  headFrame2,
-  headFrame3,
-  headFrame4,
-  headFrame5,
-  headFrame6,
-  headFrame7,
-]
 
 const LEGS_FRAMES = [
   legsFrame1,
@@ -79,9 +63,10 @@ export function StatusView() {
           className="status-layer status-layer--legs"
           frames={LEGS_FRAMES}
         />
-        <SpriteLoop
+        <img
           className="status-layer status-layer--head"
-          frames={HEAD_FRAMES}
+          src={headImage}
+          alt=""
         />
         <span className="status-mark status-mark--head">— CABEZA</span>
         <span className="status-mark status-mark--arms">— BRAZOS</span>

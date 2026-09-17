@@ -11,23 +11,6 @@
   /* Page background behind the device */
   --page-bg: #101216;
 
-  /* Screen design-space dimensions (logical pixels). The screen is rendered
-     at these proportions and scaled up to fill the viewport via --screen-scale
-     (set at runtime by useScreenScale, the "design space" stays fixed). */
-  --screen-width: 700px;
-  --screen-height: 420px;
-
-  /* Runtime layout scale: .screen is authored in design px above and
-     zoom: var(--screen-scale) upscales it to near-fullscreen. */
-  --screen-scale: 1;
-
-  /* Pixel metrics of the area around the screen (design px, scaled by
-     --screen-scale). Used both by useScreenScale to fit the viewport and by
-     the CSS below, so button/gap/padding grow proportionally with the screen. */
-  --app-padding: 8px;
-  --app-gap: 20px;
-  --power-button-size: 48px;
-
   /* Typography */
   --font-pipboy: 'Monofonto', 'Courier New', monospace;
 }
