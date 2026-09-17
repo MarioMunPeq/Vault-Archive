@@ -4,17 +4,17 @@
   flex-wrap: wrap;
   justify-content: center;
   align-content: center;
-  gap: 10px 14px;
+  gap: 16px 22px;
   padding: 8px 12px;
 }
 
 .special-cell {
-  width: 112px;
+  width: 168px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 8px 4px;
+  gap: 6px;
+  padding: 12px 6px;
   border: 1px solid transparent;
   cursor: pointer;
 }
@@ -27,18 +27,18 @@
 }
 
 .special-cell__sigla {
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   letter-spacing: 0.24em;
   color: var(--pipboy-color-faint);
 }
 
 .special-cell__icon {
-  width: 62px;
-  height: 62px;
+  width: 104px;
+  height: 104px;
 }
 
 .special-cell__value {
-  font-size: 1.25rem;
+  font-size: 1.7rem;
   color: var(--pipboy-color);
   text-shadow: 0 0 6px var(--pipboy-color-glow);
 }
