@@ -1,0 +1,24 @@
+:root {
+  /* Pip-Boy monochrome color (swap to change the whole tint) */
+  --pipboy-color: #1eff00;
+  --pipboy-color-glow: rgba(30, 255, 0, 0.55);
+  --pipboy-color-faint: rgba(30, 255, 0, 0.22);
+  --pipboy-color-deep: rgba(30, 255, 0, 0.07);
+
+  /* Screen background (near-black with a green hint) */
+  --screen-bg: #030b00;
+
+  /* Page background behind the device */
+  --page-bg: #101216;
+
+  /* Device outer dimensions */
+  --device-width: 720px;
+  --device-height: 540px;
+
+  /* Screen area dimensions */
+  --screen-width: 560px;
+  --screen-height: 400px;
+
+  /* Typography */
+  --font-pipboy: 'Monofonto', 'Courier New', monospace;
+}

@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--page-bg);
+  color: var(--pipboy-color);
+  font-family: var(--font-pipboy);
+  /* Crisp pixels suit the terminal aesthetic */
+  -webkit-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+#root {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}

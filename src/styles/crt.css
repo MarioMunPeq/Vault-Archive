@@ -1,0 +1,181 @@
+.crt {
+  --crt-turn-on-duration: 1.4s;
+  --crt-turn-off-duration: 0.7s;
+
+  position: relative;
+  overflow: hidden;
+  background: var(--screen-bg);
+  color: var(--pipboy-color);
+}
+
+.crt__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.crt--off {
+  background: #000;
+}
+
+.crt--off .crt__content {
+  visibility: hidden;
+}
+
+.crt--off::before,
+.crt--off::after {
+  display: none;
+}
+
+.crt--fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0) 58%,
+      rgba(0, 0, 0, 0.45) 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.14) 0,
+      rgba(0, 0, 0, 0.14) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.04) 0,
+      rgba(255, 0, 0, 0.04) 1px,
+      rgba(0, 255, 0, 0.02) 1px,
+      rgba(0, 255, 0, 0.02) 2px,
+      rgba(0, 0, 255, 0.04) 2px,
+      rgba(0, 0, 255, 0.04) 3px
+    );
+  background-size: 100% 100%, 100% 3px, 3px 100%;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+.crt--fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: rgba(191, 255, 170, 0.02);
+  animation: crt-flicker 0.15s infinite;
+}
+
+@keyframes crt-flicker {
+  0% {
+    opacity: 0.06;
+  }
+  8% {
+    opacity: 0.03;
+  }
+  17% {
+    opacity: 0.08;
+  }
+  25% {
+    opacity: 0.05;
+  }
+  34% {
+    opacity: 0.07;
+  }
+  42% {
+    opacity: 0.02;
+  }
+  50% {
+    opacity: 0.06;
+  }
+  58% {
+    opacity: 0.09;
+  }
+  67% {
+    opacity: 0.04;
+  }
+  75% {
+    opacity: 0.07;
+  }
+  83% {
+    opacity: 0.03;
+  }
+  92% {
+    opacity: 0.06;
+  }
+  100% {
+    opacity: 0.05;
+  }
+}
+
+@keyframes crt-turn-on {
+  0% {
+    transform: translateY(-100%) scale(1, 0.02);
+    filter: brightness(22) contrast(2);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  25% {
+    transform: translateY(-6%) scale(1, 1.02);
+    filter: brightness(6) contrast(1.6);
+    animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  45% {
+    transform: translateY(1.5%) scale(1.04, 0.98);
+    filter: brightness(2.4) contrast(1.2);
+    animation-timing-function: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  }
+  70% {
+    transform: translateY(0) scale(1.02, 1.01);
+    filter: brightness(1.15);
+    animation-timing-function: ease-out;
+  }
+  85% {
+    transform: translateY(-0.3%) scale(0.999, 1.002);
+    filter: brightness(0.97) contrast(1.05);
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+    filter: brightness(1) contrast(1) saturate(1);
+    opacity: 1;
+  }
+}
+
+.crt--turn-on {
+  animation: crt-turn-on var(--crt-turn-on-duration) both;
+}
+
+@keyframes crt-turn-off {
+  0% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+  30% {
+    filter: brightness(1.6);
+  }
+  60% {
+    transform: scale(1, 0.15);
+    filter: brightness(6);
+  }
+  85% {
+    transform: scale(0.92, 0.02);
+    filter: brightness(14);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: scale(0.002, 0.002);
+    filter: brightness(30);
+    opacity: 0;
+  }
+}
+
+.crt--turn-off {
+  animation: crt-turn-off var(--crt-turn-off-duration) both;
+}

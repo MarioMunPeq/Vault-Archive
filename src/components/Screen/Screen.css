@@ -1,0 +1,4 @@
+.screen {
+  width: var(--screen-width);
+  height: var(--screen-height);
+}

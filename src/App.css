@@ -1,0 +1,57 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 32px;
+}
+
+.app__screen {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.placeholder__title {
+  font-size: 2.4rem;
+  letter-spacing: 0.28em;
+  color: var(--pipboy-color);
+  text-shadow:
+    0 0 6px var(--pipboy-color-glow),
+    0 0 24px var(--pipboy-color-deep);
+}
+
+.power-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: #17191d;
+  color: var(--pipboy-color-faint);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.power-button:hover {
+  border-color: var(--pipboy-color-glow);
+}
+
+.power-button:focus-visible {
+  outline: 2px solid var(--pipboy-color);
+  outline-offset: 3px;
+}
+
+.power-button--on {
+  color: var(--pipboy-color);
+  box-shadow: 0 0 14px var(--pipboy-color-deep);
+}
