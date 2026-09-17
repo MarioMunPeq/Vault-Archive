@@ -1,76 +1,90 @@
 .status {
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
+  justify-content: center;
+  gap: 8px;
   padding: 4px 0;
 }
 
+/* Composite container: body canvas (75x109) plus the head sticking out above
+   it. Values below are derived from the actual sprite pixels:
+     - body is 75px wide, vertical axis at x=37.5 (50%)
+     - body shoulders start at row ~5 (neck/throat below)
+     - head is 38x51; its chin (jaw line around head row 43) meets the top of
+       the shoulders, and its neck overlaps the body neck
+   => full figure box = 75 wide x 147 tall, head on top, body below.
+   The debug sliders (?debug=1) tune these three head properties in real time:
+     x+=right, y+=down (screen design px), scale around the chin base. */
 .status__character {
-  /* --status-head-offset-x: desplaza la cabeza en horizontal. +mueve a la
-     derecha, - a la izquierda. Unidades: px de pantalla (no escaladas). */
   --status-head-offset-x: 0px;
-  /* --status-head-offset-y: desplaza la cabeza en vertical. +baja, -sube
-     (mientras la escala venga de --status-head-scale). Unidades: px de pantalla. */
   --status-head-offset-y: 0px;
-  /* --status-head-scale: escala el tamaño de la cabeza alrededor de su centro.
-     1 = tamaño base; 0.9 = 90%; 1.1 = 110%. Ajusta antes que los offsets. */
   --status-head-scale: 1;
 
   position: relative;
-  width: 128px;
-  height: 186px;
+  height: 84%;
+  aspect-ratio: 75 / 147;
+  flex-shrink: 0;
 }
 
+/* body/torso/legs: 109/147 from the top (shoulder line to the feet) */
 .status-layer--legs {
   position: absolute;
-  inset: 0;
+  top: 25.85%;
+  left: 0;
+  width: 100%;
+  height: 74.15%;
 }
 
+/* head: 38/147 tall, centered on the body axis at x=37.5 (=24.67%+19px) */
 .status-layer--head {
   position: absolute;
   top: 0;
-  left: 23.3%;
-  width: 53.3%;
-  height: 46.8%;
+  left: 24.67%;
+  width: 50.67%;
+  height: 34.69%;
+  /* scale grows the head up from the chin/neck base so it stays on the
+     shoulders; x/y offsets slide it in design px. */
   transform:
     translate(var(--status-head-offset-x), var(--status-head-offset-y))
     scale(var(--status-head-scale));
+  transform-origin: 50% 100%;
 }
 
 .status-mark {
   position: absolute;
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   letter-spacing: 0.16em;
   color: var(--pipboy-color-faint);
   white-space: nowrap;
 }
 
 .status-mark--head {
-  top: 2%;
-  left: 4%;
+  top: 5%;
+  left: 26%;
 }
 
 .status-mark--arms {
-  top: 42%;
-  left: 2%;
+  top: 52%;
+  left: 3%;
   writing-mode: vertical-rl;
 }
 
 .status-mark--torso {
-  top: 62%;
-  left: 8%;
+  top: 42%;
+  left: 7%;
 }
 
 .status-mark--legs {
-  top: 80%;
-  left: 22%;
+  top: 82%;
+  left: 18%;
 }
 
 .status__conditions {
   display: flex;
-  gap: 18px;
-  margin-top: 4px;
+  gap: 22px;
 }
 
 .status-condition {
@@ -81,27 +95,27 @@
 }
 
 .status-condition__icon {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   filter: drop-shadow(0 0 4px var(--pipboy-color-deep));
 }
 
 .status-condition__label {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   letter-spacing: 0.12em;
   color: var(--pipboy-color-faint);
 }
 
 .status-condition__value {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: var(--pipboy-color);
   text-shadow: 0 0 4px var(--pipboy-color-glow);
 }
 
 .status__name {
-  margin-top: 6px;
-  font-size: 0.75rem;
+  margin-top: 2px;
+  font-size: 0.85rem;
   letter-spacing: 0.24em;
   color: var(--pipboy-color);
   text-shadow: 0 0 6px var(--pipboy-color-glow);

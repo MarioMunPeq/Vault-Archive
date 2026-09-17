@@ -6,6 +6,7 @@ import { Stat } from './components/tabs/Stat/Stat'
 import { StatusBar } from './components/StatusBar/StatusBar'
 import { usePowerState } from './hooks/usePowerState'
 import { useActiveTab } from './hooks/useActiveTab'
+import { useScreenScale } from './hooks/useScreenScale'
 import { playSfx } from './utils/sfx'
 import './App.css'
 
@@ -35,6 +36,7 @@ const BOOT_FRAMES = [
 function App() {
   const { phase, isOn, toggle, completeBoot } = usePowerState()
   const { tabs, activeTab, setActiveTab } = useActiveTab()
+  useScreenScale()
   const [crtEnabled] = useState(true)
 
   useEffect(() => {

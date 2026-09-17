@@ -1,12 +1,15 @@
 .app {
+  /* Everything below scales with --screen-scale (set at runtime) so the
+     screen, the gap and the power button grow proportionally together. */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
-  padding: 32px;
+  gap: calc(var(--app-gap) * var(--screen-scale));
+  padding: calc(var(--app-padding) * var(--screen-scale));
 }
 
 .app__screen {
+  width: fit-content;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.06),
     0 0 40px rgba(0, 0, 0, 0.8);
@@ -51,14 +54,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: calc(var(--power-button-size) * var(--screen-scale));
+  height: calc(var(--power-button-size) * var(--screen-scale));
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   background: #17191d;
   color: var(--pipboy-color-faint);
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.power-button__icon {
+  width: 55%;
+  height: 55%;
 }
 
 .power-button:hover {

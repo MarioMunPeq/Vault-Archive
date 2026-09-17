@@ -1,4 +1,8 @@
+import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { SpriteLoop } from '../../SpriteLoop/SpriteLoop'
+import { HeadDebugPanel } from './HeadDebugPanel'
+import type { HeadValues } from './HeadDebugPanel'
 import headFrame1 from '../../../assets/images/stats/head/1.png'
 import headFrame2 from '../../../assets/images/stats/head/2.png'
 import headFrame3 from '../../../assets/images/stats/head/3.png'
@@ -54,10 +58,23 @@ const CONDITIONS: readonly ConditionItem[] = [
   { icon: helmetIcon, label: 'Casco', value: '—' },
 ]
 
+const HEAD_DEBUG_ENABLED =
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('debug') === '1'
+
 export function StatusView() {
+  const [head, setHead] = useState<HeadValues>({ x: 0, y: 0, scale: 1 })
+
+  const characterStyle = {
+    '--status-head-offset-x': `${head.x}px`,
+    '--status-head-offset-y': `${head.y}px`,
+    '--status-head-scale': String(head.scale),
+  } as CSSProperties
+
   return (
     <div className="status">
-      <div className="status__character">
+      {HEAD_DEBUG_ENABLED && <HeadDebugPanel values={head} onChange={setHead} />}
+      <div className="status__character" style={characterStyle}>
         <SpriteLoop
           className="status-layer status-layer--legs"
           frames={LEGS_FRAMES}

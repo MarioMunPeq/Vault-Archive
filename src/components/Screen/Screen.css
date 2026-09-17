@@ -1,4 +1,7 @@
 .screen {
   width: var(--screen-width);
   height: var(--screen-height);
+  /* Scales the whole screen (and everything inside it) from the design space
+     to fill the viewport. Set at runtime by useScreenScale. */
+  zoom: var(--screen-scale);
 }
