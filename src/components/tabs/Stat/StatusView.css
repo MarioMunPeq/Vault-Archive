@@ -12,22 +12,22 @@
 /* Composite container: body canvas (75x109) plus the head sticking out above
    it. Layout values were derived from the actual sprite pixels (body/1.png and
    head/1.png):
-     - Body "neck stump" (the nub where the head must attach) sits at rows 0-2,
-       centered at x~46; the shoulder V widens from row 3 down to ~50px at
-       row 15. Measured across ALL 8 walk frames, the neck stump is the most
-       stable point on the sprite (cx 45.7..46.7), while the torso axis sways
-       ~+/1.6px -- so anchoring the head to the neck keeps it seated for the
-       whole walk cycle, not just frame 1.
-     - Head is 38x51; its neck root (bottom rows 44-50) tapers to ~7px at
-       row 50 and is centered at x~18 in head-canvas space.
-   => neck-to-neck alignment: head neck cx 18 -> body neck cx 46, so the head
-      layer starts at 28/75 = 37.33%.
-   Vertical: head row 50 lands on body row 12 and the chin (head row 43) on
-   body row ~5, i.e. right on the shoulder line; the tapered neck tip is hidden
-   inside the shoulders, so there is no floating gap. Body occupies its canvas
-   starting at 38/147 = 25.85%.
-   The head pivots at 50% 100% (bottom center ~= the neck root), so scaling
-   pulls the face in toward the neck and keeps the seat fixed:
+     - Torso/waist axis: measured across ALL 8 walk frames on the shoulder V
+       (rows 3-16), the torso content centerline is x 37.0..38.6 (mean 37.94),
+       i.e. pressed against the body canvas centerline (37.5). The body's top
+       rows (0-4) carry a small "neck nub" at x~44-51 that the head overlaps,
+       so the stable reference for compositing is the TORSO centerline, not the
+       nub.
+     - Head is 38x51; its content (alpha-weighted centroid, i.e. the face) is
+       at x 17.64 in head-canvas space.
+   => face-over-torso alignment: head content cx 17.64 -> torso centerline 38,
+      so the head layer starts at (38-17.64)/75 = 26.8%.
+   Vertical: the head pivots at 50% 100%, so scale 0.8 keeps the neck root at
+   the bottom. Head bottom (row 50) lands on body row ~13 and the chin (head
+   row 43) on body row ~7, right at the shoulder line; the tapered neck tip is
+   hidden inside the shoulders and the jaw covers the neck nub, so there is no
+   floating gap and nothing peeks out from behind the head. Body occupies its
+   canvas starting at 38/147 = 25.85%.
      - scale 0.8: face 38 -> 30.4px, ~0.79 of the mean shoulder width (38.6px)
    The debug sliders (?debug=1) tune these three in real time:
      x+=right, y+=down (screen design px), scale around the neck root. */
@@ -54,14 +54,15 @@
   height: 74.15%;
 }
 
-/* head: 51/147 tall; left 37.33% seats the head's neck root (x~18 in the
-   38px head canvas) on the body's neck stump (x~46 in the 75px body canvas).
+/* head: 51/147 tall; left 26.8% puts the head's face centroid (x~17.64 of the
+   38px head canvas) on the torso centerline (x~38 of the 75px body canvas),
+   matching how the original Pip-Boy draws the head over the shoulders.
    object-position left keeps the head left-anchored like the source frames
    (head/4..7 use wider 39-40px canvases with all content at x=0..). */
 .status-layer--head {
   position: absolute;
   top: 0;
-  left: 37.33%;
+  left: 26.8%;
   width: 50.67%;
   height: 34.69%;
   display: block;

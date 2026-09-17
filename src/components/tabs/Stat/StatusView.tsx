@@ -46,12 +46,13 @@ const HEAD_DEBUG_ENABLED =
   typeof window !== 'undefined' &&
   new URLSearchParams(window.location.search).get('debug') === '1'
 
-// Defaults: the anchoring is done in StatusView.css by seating the head's neck
-// root (x~18 of the 38px head canvas) on the body's neck stump (x~46 of the
-// 75px body canvas) and by placing head row 50 on body row 12 (chin on the
-// shoulder line). Starting offsets are 0/0; scale 0.8 shrinks the 38px face to
-// ~30.4px, proportional to the ~38.6px mean shoulder width. The debug panel
-// (?debug=1) still slides x/y/scale over that base in real time.
+// Defaults: the anchoring is done in StatusView.css by putting the head's face
+// centroid (x~17.64 of the 38px head canvas) on the torso centerline (x~38 of
+// the 75px body canvas, measured across all 8 walk frames) and by placing the
+// chin (head row 43) on body row ~7, i.e. on the shoulder line, with the neck
+// tip hidden inside the torso. Starting offsets are 0/0; scale 0.8 shrinks the
+// 38px face to ~30.4px, proportional to the ~38.6px mean shoulder width. The
+// debug panel (?debug=1) still slides x/y/scale over that base in real time.
 const HEAD_DEFAULTS: HeadValues = { x: 0, y: 0, scale: 0.8 }
 
 export function StatusView() {

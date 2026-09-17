@@ -1,20 +1,42 @@
+/* 2/3/2 central composition. Each row is offset a few px from the previous so
+   the grid reads slightly imperfect (hand-placed), like the original Pip-Boy.
+   Icons are the native 240px SVGs recoloured to the pip green; the rows spread
+   to use the full central band without any scale() on the whole layout. */
 .special-grid {
   height: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-content: center;
-  gap: 16px 22px;
-  padding: 8px 12px;
+  gap: clamp(12px, 2.6vh, 30px);
+  padding: 6px clamp(14px, 4vw, 48px);
+}
+
+.special-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(24px, 7vw, 96px);
+}
+
+.special-row--1 {
+  transform: translateX(-8px);
+}
+
+.special-row--2 {
+  transform: translateX(5px);
+}
+
+.special-row--3 {
+  transform: translateX(-3px);
 }
 
 .special-cell {
-  width: 168px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 12px 6px;
+  padding: 4px 2px;
   border: 1px solid transparent;
   cursor: pointer;
 }
@@ -33,8 +55,10 @@
 }
 
 .special-cell__icon {
-  width: 104px;
-  height: 104px;
+  width: clamp(96px, 17vh, 164px);
+  height: clamp(96px, 17vh, 164px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px var(--pipboy-color-deep));
 }
 
 .special-cell__value {
