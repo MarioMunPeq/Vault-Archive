@@ -3,6 +3,11 @@ import { BootSequence } from './components/BootSequence/BootSequence'
 import { Screen } from './components/Screen/Screen'
 import { TabNav } from './components/TabNav/TabNav'
 import { Stat } from './components/tabs/Stat/Stat'
+import { Items } from './components/tabs/Items/Items'
+import { Data } from './components/tabs/Data/Data'
+import { Radio } from './components/tabs/Radio/Radio'
+import { Map } from './components/tabs/Map/Map'
+import { HackView } from './components/tabs/Hack/HackView'
 import { StatusBar } from './components/StatusBar/StatusBar'
 import { useActiveTab } from './hooks/useActiveTab'
 import { playSfx } from './utils/sfx'
@@ -63,6 +68,16 @@ function App() {
             <div className="hud__content">
               {activeTab === 'STAT' ? (
                 <Stat />
+              ) : activeTab === 'ITEMS' ? (
+                <Items />
+              ) : activeTab === 'DATA' ? (
+                <Data />
+              ) : activeTab === 'RADIO' ? (
+                <Radio />
+              ) : activeTab === 'MAP' ? (
+                <Map />
+              ) : activeTab === 'HACK' ? (
+                <HackView />
               ) : (
                 <div className="placeholder">
                   <p className="placeholder__title">{activeTab}</p>

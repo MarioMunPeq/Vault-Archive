@@ -117,3 +117,12 @@
   text-shadow: 0 0 6px var(--pipboy-color-glow);
   flex-shrink: 0;
 }
+
+/* Role shown diegetically, like one more terminal data row */
+.status__class {
+  margin-top: -2px;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--pipboy-color-faint);
+  flex-shrink: 0;
+}

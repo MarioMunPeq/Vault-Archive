@@ -146,7 +146,8 @@ export function StatusView() {
           </div>
         ))}
       </div>
-      <p className="status__name">Vault Dweller</p>
+      <p className="status__name">Mario Muñoz Pequeño</p>
+      <p className="status__class">CLASS: Software Developer</p>
     </div>
   )
 }

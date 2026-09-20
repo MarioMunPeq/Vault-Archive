@@ -1,0 +1,125 @@
+.map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* The mapbox canvas sits below the CRT scanlines inherited from Screen. */
+.map .mapboxgl-map {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-pipboy);
+}
+
+.map--status {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.map__status-title {
+  font-size: 1.05rem;
+  letter-spacing: 0.26em;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 8px var(--pipboy-color-glow);
+  animation: map-blink 1.4s steps(2, end) infinite;
+}
+
+.map__status-sub {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--pipboy-color-faint);
+}
+
+@keyframes map-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ---------- markers ---------- */
+
+.map-marker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.map-marker__pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 4px;
+  border: 2px solid var(--pipboy-color-glow);
+  background: rgba(3, 11, 0, 0.92);
+  box-shadow: 0 0 12px var(--pipboy-color-glow);
+  transform: rotate(-45deg);
+}
+
+.map-marker__icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+}
+
+.map-marker__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.map-marker__icon path {
+  fill: var(--pipboy-color);
+  filter: drop-shadow(0 0 2px var(--pipboy-color-glow));
+}
+
+.map-marker__pin::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  width: 2px;
+  height: 7px;
+  margin-left: -1px;
+  background: var(--pipboy-color-glow);
+}
+
+/* ---------- popup (native Mapbox, themed) ---------- */
+
+.map-popup .mapboxgl-popup-content {
+  background: rgba(3, 11, 0, 0.95);
+  color: var(--pipboy-color);
+  font-family: var(--font-pipboy);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border: 1px solid var(--pipboy-color-glow);
+  box-shadow: 0 0 14px var(--pipboy-color-glow);
+  border-radius: 0;
+  text-align: left;
+}
+
+.map-popup .mapboxgl-popup-tip {
+  border-top-color: var(--pipboy-color-glow);
+  border-bottom-color: var(--pipboy-color-glow);
+}
+
+.map-popup__name {
+  color: var(--pipboy-color);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
+  letter-spacing: 0.14em;
+}
+
+.map-popup__desc {
+  margin-top: 4px;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  color: var(--pipboy-color-faint);
+}

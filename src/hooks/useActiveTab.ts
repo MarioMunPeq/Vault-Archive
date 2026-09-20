@@ -1,8 +1,15 @@
 import { useState } from 'react'
 
-export type TabId = 'STAT' | 'ITEMS' | 'DATA' | 'MAP' | 'RADIO'
+export type TabId = 'STAT' | 'ITEMS' | 'DATA' | 'MAP' | 'RADIO' | 'HACK'
 
-export const TABS: readonly TabId[] = ['STAT', 'ITEMS', 'DATA', 'MAP', 'RADIO']
+export const TABS: readonly TabId[] = [
+  'STAT',
+  'ITEMS',
+  'DATA',
+  'MAP',
+  'RADIO',
+  'HACK',
+]
 
 export interface UseActiveTabResult {
   tabs: readonly TabId[]
