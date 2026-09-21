@@ -49,15 +49,17 @@
 }
 
 .map-marker__pin {
+  --map-marker-color: #FEBB6D;
+  --map-marker-glow: #B888483;
   position: relative;
   display: grid;
   place-items: center;
   width: 36px;
   height: 36px;
   border-radius: 50% 50% 50% 4px;
-  border: 2px solid var(--pipboy-color-glow);
+  border: 2px solid var(--map-marker-glow);
   background: rgba(3, 11, 0, 0.92);
-  box-shadow: 0 0 12px var(--pipboy-color-glow);
+  box-shadow: 0 0 12px var(--map-marker-glow);
   transform: rotate(-45deg);
 }
 
@@ -75,8 +77,8 @@
 }
 
 .map-marker__icon path {
-  fill: var(--pipboy-color);
-  filter: drop-shadow(0 0 2px var(--pipboy-color-glow));
+  fill: #FEBB6D;
+  filter: drop-shadow(0 0 2px #FEBB6D);
 }
 
 .map-marker__pin::after {
@@ -86,8 +88,8 @@
   left: 50%;
   width: 2px;
   height: 7px;
-  margin-left: -1px;
-  background: var(--pipboy-color-glow);
+  margin: -1px 0 0 -1px;
+  background: #B88848;
 }
 
 /* ---------- popup (native Mapbox, themed) ---------- */
