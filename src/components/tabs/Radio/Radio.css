@@ -212,7 +212,7 @@
   border-bottom: 1px dashed var(--pipboy-color-deep);
   font: inherit;
   cursor: pointer;
-  color: var(--pipboy-color-faint);
+  color: var(--pipboy-color-subtle);
   text-align: left;
   transition: background 90ms steps(2, end);
 }
@@ -247,7 +247,7 @@
 }
 
 .radio__station--offair {
-  opacity: 0.35;
+  opacity: 0.55;
 }
 
 .radio__station:hover:not(.radio__station--active) {
@@ -498,7 +498,7 @@ input[type='range'].radio__volume-slider::-moz-range-thumb {
 .radio__missing-sub {
   font-size: 0.58rem;
   letter-spacing: 0.14em;
-  color: var(--pipboy-color-deep);
+  color: var(--pipboy-color-dim);
 }
 
 /* ---------- tuning overlay ---------- */

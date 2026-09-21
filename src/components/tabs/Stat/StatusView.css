@@ -48,35 +48,6 @@
   object-fit: contain;
 }
 
-.status-mark {
-  position: absolute;
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  color: var(--pipboy-color-faint);
-  white-space: nowrap;
-}
-
-.status-mark--head {
-  top: 2%;
-  left: 40%;
-}
-
-.status-mark--arms {
-  top: 52%;
-  left: 3%;
-  writing-mode: vertical-rl;
-}
-
-.status-mark--torso {
-  top: 42%;
-  left: 7%;
-}
-
-.status-mark--legs {
-  top: 82%;
-  left: 18%;
-}
-
 .status__conditions {
   display: flex;
   gap: 30px;
@@ -93,14 +64,16 @@
 .status-condition__icon {
   width: 46px;
   height: 46px;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   filter: drop-shadow(0 0 4px var(--pipboy-color-deep));
 }
 
-.status-condition__label {
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-  color: var(--pipboy-color-faint);
+.status-condition__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .status-condition__value {

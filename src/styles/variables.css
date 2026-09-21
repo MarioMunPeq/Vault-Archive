@@ -5,6 +5,10 @@
   --pipboy-color-faint: rgba(30, 255, 0, 0.22);
   --pipboy-color-deep: rgba(30, 255, 0, 0.07);
 
+  /* Secondary UI contrast tokens — higher luminance for readability on CRT */
+  --pipboy-color-dim: rgba(30, 255, 0, 0.42);
+  --pipboy-color-subtle: rgba(30, 255, 0, 0.32);
+
   /* Screen background (near-black with a green hint) */
   --screen-bg: #030b00;
 

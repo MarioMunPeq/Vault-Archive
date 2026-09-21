@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import type { Map as MapboxMap } from 'mapbox-gl'
 import { MAP_CENTER, MAP_LOCATIONS } from '../../../data/mapLocations'
 import type { MapCategory, MapLocation } from '../../../data/mapLocations'
 import { LocationPanel } from './LocationPanel'
+import { OffscreenPOIIndicators } from './OffscreenPOIIndicators'
 import studyIcon from '../../../assets/icons/map/graduate-cap.svg?raw'
 import workIcon from '../../../assets/icons/map/briefcase.svg?raw'
 import './Map.css'
@@ -38,6 +40,7 @@ export function Map() {
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(
     null,
   )
+  const [mapInstance, setMapInstance] = useState<MapboxMap | null>(null)
 
   const configured = Boolean(MAPBOX_TOKEN && MAPBOX_STYLE_URL)
 
@@ -69,6 +72,8 @@ export function Map() {
       attributionControl: false,
     })
 
+    setMapInstance(map)
+
     // Sin fitBounds: encuadrar las 6 coordenadas obligaría a alejar la cámara
     // hasta caber todo el conjunto (≈7,5 km de norte a sur). Queremos una
     // vista fija más cercana, así que la cámara es la del constructor.
@@ -82,6 +87,7 @@ export function Map() {
     }
 
     return () => {
+      setMapInstance(null)
       map.remove()
     }
   }, [configured])
@@ -99,6 +105,7 @@ export function Map() {
 
   return (
     <div ref={containerRef} className="map">
+      <OffscreenPOIIndicators map={mapInstance} />
       {selectedLocation ? (
         <LocationPanel
           location={selectedLocation}

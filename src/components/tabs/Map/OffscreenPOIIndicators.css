@@ -1,0 +1,84 @@
+.offscreen-indicators {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.offscreen-indicator {
+  position: absolute;
+  left: var(--indicator-x);
+  top: var(--indicator-y);
+  transform: translate(-50%, -50%) rotate(var(--indicator-rotation));
+  transform-origin: center center;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 4px var(--pipboy-color-glow));
+}
+
+.offscreen-indicator__arrow {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 13px solid var(--pipboy-color);
+  filter:
+    drop-shadow(0 0 2px var(--pipboy-color-glow))
+    drop-shadow(0 0 6px var(--pipboy-color-glow));
+  animation: offscreen-pulse 3.5s ease-in-out infinite;
+}
+
+.offscreen-indicator[data-edge='top'] .offscreen-indicator__arrow {
+  border-bottom: 13px solid var(--pipboy-color);
+  border-top: none;
+}
+
+.offscreen-indicator[data-edge='bottom'] .offscreen-indicator__arrow {
+  border-top: 13px solid var(--pipboy-color);
+  border-bottom: none;
+}
+
+.offscreen-indicator[data-edge='left'] .offscreen-indicator__arrow {
+  border-right: 13px solid var(--pipboy-color);
+  border-bottom: 7px solid transparent;
+  border-top: 7px solid transparent;
+  border-left: none;
+}
+
+.offscreen-indicator[data-edge='right'] .offscreen-indicator__arrow {
+  border-left: 13px solid var(--pipboy-color);
+  border-bottom: 7px solid transparent;
+  border-top: 7px solid transparent;
+  border-right: none;
+}
+
+@keyframes offscreen-pulse {
+  0%, 100% {
+    opacity: 0.85;
+    filter:
+      drop-shadow(0 0 2px var(--pipboy-color-glow))
+      drop-shadow(0 0 6px var(--pipboy-color-glow));
+  }
+  50% {
+    opacity: 1;
+    filter:
+      drop-shadow(0 0 3px var(--pipboy-color-glow))
+      drop-shadow(0 0 10px var(--pipboy-color-glow))
+      drop-shadow(0 0 16px var(--pipboy-color-glow));
+  }
+}
+
+.offscreen-indicator::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: radial-gradient(
+    circle at center,
+    var(--pipboy-color-deep) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.6;
+}
