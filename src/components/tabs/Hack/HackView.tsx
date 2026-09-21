@@ -73,9 +73,6 @@ export function HackView() {
     return () => window.clearInterval(id)
   }, [])
 
-  // Measures the memory area so the board fills the whole screen. Re-runs on
-  // any resize; the measured size feeds future games (not the current one, so
-  // resizing never resets an in-progress minigame).
   useEffect(() => {
     const element = memoryRef.current
     if (!element) return
@@ -102,9 +99,6 @@ export function HackView() {
     return () => observer.disconnect()
   }, [booted])
 
-  // Creates/refreshes the board once the terminal is measured and the
-  // dictionary is ready. Keyed by boot+difficulty, so switching levels starts
-  // a fresh game while resizing keeps the current one running.
   useEffect(() => {
     if (!booted || loadState !== 'ready') return
     const buckets = getBucketsSync()
@@ -170,56 +164,67 @@ export function HackView() {
     const tokens = parseLineTokens(line)
     const children: ReactNode[] = []
     let cursor = 0
+    const lineKey = `${line.column}-${line.row}`
 
     tokens.forEach((token) => {
       if (token.start > cursor) {
         children.push(
-          <span key={`noise-${line.column}-${line.row}-${cursor}`}>
+          <span key={`noise-${lineKey}-${cursor}`}>
             {line.content.slice(cursor, token.start)}
           </span>,
         )
       }
 
-      if (token.kind === 'dud') {
-        const used = game ? game.usedDuds.has(token.id) : false
-        if (used) {
+      const isDud = token.kind === 'dud'
+      const dudUsed = game ? game.usedDuds.has(token.id) : false
+
+      if (isDud) {
+        if (dudUsed) {
           children.push(
             <span
               key={token.id}
-              className="hack-word hack-word--dud hack-word--dud--used"
+              className="hack-token hack-token--dud hack-token--dud--used"
             >
               {token.text}
             </span>,
           )
-        } else {
-          children.push(
-            <button
-              key={token.id}
-              type="button"
-              className="hack-word hack-word--dud"
-              onClick={() => handleDud(token.id)}
+} else {
+           children.push(
+             <span
+               key={token.id}
+               className="hack-token hack-token--dud"
+               onClick={(e) => {
+                const target = e.currentTarget as HTMLElement
+                const rect = target.getBoundingClientRect()
+                const clickX = e.clientX - rect.left
+                const charWidth = rect.width / token.text.length
+                const clickedCharIndex = Math.floor(clickX / charWidth)
+                if (clickedCharIndex === 0) {
+                  handleDud(token.id)
+                }
+              }}
             >
               {token.text}
-            </button>,
+            </span>,
           )
         }
       } else {
         const wordIndex = token.wordIndex as number
         const removed = game ? game.removed.has(wordIndex) : false
         const struck = game ? game.struck.has(wordIndex) : false
+
         if (removed) {
           children.push(<span key={token.id}>{token.text}</span>)
         } else {
+          const displayText = struck ? '.'.repeat(token.text.length) : token.text
           children.push(
-            <button
+            <span
               key={token.id}
-              type="button"
-              className={struck ? 'hack-word hack-word--struck' : 'hack-word'}
-              disabled={struck}
+              className={`hack-token hack-token--word${struck ? ' hack-token--struck' : ''}`}
               onClick={() => handleGuess(wordIndex)}
             >
-              {token.text}
-            </button>,
+              {displayText}
+            </span>,
           )
         }
       }
@@ -229,14 +234,14 @@ export function HackView() {
 
     if (cursor < line.content.length) {
       children.push(
-        <span key={`noise-end-${line.column}-${line.row}-${cursor}`}>
+        <span key={`noise-end-${lineKey}-${cursor}`}>
           {line.content.slice(cursor)}
         </span>,
       )
     }
 
     return (
-      <div key={`${line.column}-${line.row}`} className="terminal__line">
+      <div key={lineKey} className="terminal__line">
         <span className="terminal__addr">{line.address}</span>
         <span className="terminal__content">{children}</span>
       </div>
@@ -292,7 +297,7 @@ export function HackView() {
             <>
               <div className="terminal__attempts">
                 <span className="terminal__attempts-text">
-                  &gt;Attempt(s) Remaining: {remaining}
+                  {'>'}Attempt(s) Remaining: {remaining}
                 </span>
                 <span className="terminal__attempts-blocks" aria-hidden="true">
                   {Array.from({ length: MAX_ATTEMPTS }, (_, index) => (
@@ -338,7 +343,7 @@ export function HackView() {
               </div>
 
               <div className="terminal__prompt">
-                <span>&gt; </span>
+                <span>{'>'} </span>
                 <span className="terminal__cursor" />
               </div>
             </>
@@ -357,10 +362,10 @@ export function HackView() {
 
           {game?.phase === 'blocked' && (
             <div className="terminal__overlay">
-              <p className="terminal__overlay-line">&gt;Attempt(s) Remaining: 0</p>
-              <p className="terminal__overlay-line">&gt;TERMINAL LOCKED</p>
+              <p className="terminal__overlay-line">{'>'}Attempt(s) Remaining: 0</p>
+              <p className="terminal__overlay-line">{'>'}TERMINAL LOCKED</p>
               <p className="terminal__overlay-line">
-                &gt;PLEASE CONTACT AN ADMINISTRATOR
+                {'>'}PLEASE CONTACT AN ADMINISTRATOR
               </p>
               <button type="button" className="hack-button" onClick={newGame}>
                 REINICIAR

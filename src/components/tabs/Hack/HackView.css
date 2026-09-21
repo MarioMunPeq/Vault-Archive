@@ -29,9 +29,6 @@
   display: flex;
 }
 
-/* Terminal de hackeo. Monofonto (la fuente del Pip-Boy) es monospace
-   (todos los glifos comparten la misma anchura), así que las líneas de
-   memoria y las direcciones hex quedan alineadas como en el terminal real. */
 .terminal {
   position: relative;
   flex: 1 1 auto;
@@ -43,8 +40,8 @@
   background: var(--screen-bg);
   padding: 10px 12px;
   font-family: var(--font-pipboy);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: 0.75rem;
+  line-height: 1.35;
   color: var(--pipboy-color);
   text-shadow: 0 0 5px var(--pipboy-color-glow);
   user-select: none;
@@ -72,7 +69,7 @@
 }
 
 .terminal__attempts-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   color: var(--pipboy-color);
   white-space: nowrap;
@@ -80,12 +77,12 @@
 
 .terminal__attempts-blocks {
   display: inline-flex;
-  gap: 6px;
+  gap: 4px;
   margin-left: auto;
 }
 
 .terminal__attempt-block {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1;
   color: var(--pipboy-color-faint);
 }
@@ -95,8 +92,6 @@
   text-shadow: 0 0 6px var(--pipboy-color-glow);
 }
 
-/* Memoria: ocupa todo el espacio sobrante y rellena el terminal con ruido
-   compacto, sin letter-spacing para que las columnas coincidan exactamente. */
 .terminal__memory {
   flex: 1 1 auto;
   min-height: 0;
@@ -107,7 +102,6 @@
   display: flex;
 }
 
-/* Cada mitad de la memoria va en su propia columna, lado a lado. */
 .terminal__column {
   flex: 1 1 0;
   min-width: 0;
@@ -116,7 +110,6 @@
   white-space: pre;
 }
 
-/* Separador vertical entre la columna izquierda y la derecha. */
 .terminal__column + .terminal__column {
   border-left: 1px solid var(--pipboy-color-deep);
   padding-left: 1ch;
@@ -146,41 +139,52 @@
   white-space: pre;
 }
 
-.hack-word {
-  font: inherit;
-  color: inherit;
-  text-shadow: inherit;
-  background: none;
-  border: none;
-  padding: 0;
+.hack-token {
+  display: inline-block;
   cursor: pointer;
+  padding: 0 1px;
+  line-height: inherit;
 }
 
-.hack-word:not(:disabled):hover,
-.hack-word--dud:hover {
-  color: #f0fff0;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
+.hack-token--word {
+  color: var(--pipboy-color);
+  text-shadow: 0 0 5px var(--pipboy-color-glow);
 }
 
-.hack-word:disabled {
-  cursor: default;
+.hack-token--word:hover {
+  background: #f0fff0;
+  color: var(--screen-bg);
+  text-shadow: none;
 }
 
-/* Dud ya consumido (isDudUsed): texto atenuado, sin efecto hover y sin
-   cursor de interacción. No es un botón, solo informa de su consumo. */
-.hack-word--dud--used,
-.hack-word--dud--used:hover {
+.hack-token--dud {
+  color: var(--pipboy-color);
+  text-shadow: 0 0 5px var(--pipboy-color-glow);
+}
+
+.hack-token--dud:hover {
+  background: #f0fff0;
+  color: var(--screen-bg);
+  text-shadow: none;
+}
+
+.hack-token--dud--used,
+.hack-token--dud--used:hover {
   color: var(--pipboy-color-faint);
   text-shadow: none;
   background: none;
   cursor: default;
 }
 
-.hack-word--struck {
+.hack-token--struck {
   color: var(--pipboy-color-faint);
   text-shadow: none;
-  text-decoration: line-through;
-  text-decoration-color: var(--pipboy-color-faint);
+}
+
+.hack-token--struck:hover {
+  background: #f0fff0;
+  color: var(--screen-bg);
+  text-shadow: none;
 }
 
 .terminal__log {
@@ -190,7 +194,7 @@
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed var(--pipboy-color-deep);
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   line-height: 1.45;
 }
 

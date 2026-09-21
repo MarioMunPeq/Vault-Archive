@@ -62,18 +62,27 @@
 .status__main {
   display: grid;
   grid-template-columns: 1fr 200px;
+  grid-template-rows: 1fr;
   gap: 16px;
   min-height: 0;
   align-items: start;
 }
 
-/* SPECIAL grid */
+/* SPECIAL grid - centered on full screen width */
 .status__special {
-  flex-shrink: 0;
+  grid-column: 1 / -1;
+  grid-row: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 0;
+  z-index: 1;
+}
+
+.status__sidebar {
+  grid-column: 2;
+  grid-row: 1;
+  z-index: 2;
 }
 
 .special-grid {
