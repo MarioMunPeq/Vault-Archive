@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-export type TabId = 'STAT' | 'ITEMS' | 'DATA' | 'MAP' | 'RADIO' | 'HACK'
+export type TabId = 'STAT' | 'MISIONES' | 'DATA' | 'MAP' | 'RADIO' | 'HACK'
 
 export const TABS: readonly TabId[] = [
   'STAT',
-  'ITEMS',
+  'MISIONES',
   'DATA',
   'MAP',
   'RADIO',

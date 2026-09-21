@@ -93,11 +93,7 @@ const SPECIAL_STATS: readonly SpecialStat[] = [
   { id: 'LCK', name: 'Suerte', value: 5, frames: LUCK_FRAMES },
 ]
 
-const SPECIAL_ROWS: readonly (number[] | readonly number[])[] = [
-  [0, 1],
-  [2, 3, 4],
-  [5, 6],
-]
+
 
 const GUN_ICON = `
 <svg fill="#1eff00" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -186,59 +182,97 @@ export function StatusView() {
           <p className="status__name">Mario Muñoz Pequeño</p>
           <p className="status__class">CLASS: Software Developer</p>
         </div>
-        <div className="status__special-header">
-          <h2 className="status__special-title">S.P.E.C.I.A.L.</h2>
-        </div>
       </header>
 
       <main className="status__main">
         <section className="status__special" aria-label="Atributos S.P.E.C.I.A.L.">
+          <h2 className="status__special-title">S.P.E.C.I.A.L.</h2>
           <div className="special-grid">
-            {SPECIAL_ROWS.map((row, rowIndex) => (
-              <div
-                key={rowIndex}
-                className={`special-row special-row--${rowIndex + 1}`}
-              >
-                {row.map((statIndex) => {
-                  const stat = SPECIAL_STATS[statIndex]
-                  return (
-                    <div
-                      key={stat.id}
-                      className="special-cell"
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`${stat.name}, ${stat.value}`}
-                    >
-                      <span className="special-cell__sigla">{stat.id}</span>
-                      <SpriteLoop
-                        className="special-cell__icon"
-                        frames={stat.frames}
-                      />
-                      <span className="special-cell__value">{stat.value}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
+            {/* Left column: STR, PER, END */}
+            <div className="special-col special-col--left">
+              {['STR', 'PER', 'END'].map((id) => {
+                const stat = SPECIAL_STATS.find(s => s.id === id)!
+                return (
+                  <div
+                    key={id}
+                    className="special-cell"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${stat.name}, ${stat.value}`}
+                  >
+                    <span className="special-cell__sigla">{stat.id}</span>
+                    <SpriteLoop
+                      className="special-cell__icon"
+                      frames={stat.frames}
+                    />
+                    <span className="special-cell__value">{stat.value}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Center column: CHR */}
+            <div className="special-col special-col--center">
+              {(() => {
+                const stat = SPECIAL_STATS.find(s => s.id === 'CHR')!
+                return (
+                  <div
+                    key="CHR"
+                    className="special-cell"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${stat.name}, ${stat.value}`}
+                  >
+                    <span className="special-cell__sigla">{stat.id}</span>
+                    <SpriteLoop
+                      className="special-cell__icon"
+                      frames={stat.frames}
+                    />
+                    <span className="special-cell__value">{stat.value}</span>
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Right column: INT, AGL, LCK */}
+            <div className="special-col special-col--right">
+              {['INT', 'AGL', 'LCK'].map((id) => {
+                const stat = SPECIAL_STATS.find(s => s.id === id)!
+                return (
+                  <div
+                    key={id}
+                    className="special-cell"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${stat.name}, ${stat.value}`}
+                  >
+                    <span className="special-cell__sigla">{stat.id}</span>
+                    <SpriteLoop
+                      className="special-cell__icon"
+                      frames={stat.frames}
+                    />
+                    <span className="special-cell__value">{stat.value}</span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </section>
 
-        <aside className="status__sidebar">
-          <div className="status__conditions">
-            {CONDITIONS.map((condition) => (
-              <div key={condition.label} className="status-condition">
-                <span
-                  className="status-condition__icon"
-                  dangerouslySetInnerHTML={{ __html: condition.icon }}
-                />
-                <div className="status-condition__info">
-                  <span className="status-condition__label">{condition.label}</span>
-                  <span className="status-condition__value">{condition.value}</span>
-                </div>
+        <div className="status__conditions-bar">
+          {CONDITIONS.map((condition) => (
+            <div key={condition.label} className="status-condition">
+              <span
+                className="status-condition__icon"
+                dangerouslySetInnerHTML={{ __html: condition.icon }}
+              />
+              <div className="status-condition__info">
+                <span className="status-condition__label">{condition.label}</span>
+                <span className="status-condition__value">{condition.value}</span>
               </div>
-            ))}
-          </div>
-        </aside>
+            </div>
+          ))}
+        </div>
       </main>
 
       <footer className="status__footer">

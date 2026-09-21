@@ -3,7 +3,7 @@ import { BootSequence } from './components/BootSequence/BootSequence'
 import { Screen } from './components/Screen/Screen'
 import { TabNav } from './components/TabNav/TabNav'
 import { Stat } from './components/tabs/Stat/Stat'
-import { Items } from './components/tabs/Items/Items'
+import { Misiones } from './components/tabs/Misiones/Misiones'
 import { Data } from './components/tabs/Data/Data'
 import { Radio } from './components/tabs/Radio/Radio'
 import { RadioProvider } from './components/tabs/Radio/RadioProvider'
@@ -71,8 +71,8 @@ function App() {
               <div className="hud__content">
                 {activeTab === 'STAT' ? (
                   <Stat />
-                ) : activeTab === 'ITEMS' ? (
-                  <Items />
+                ) : activeTab === 'MISIONES' ? (
+                  <Misiones />
                 ) : activeTab === 'DATA' ? (
                   <Data />
                 ) : activeTab === 'RADIO' ? (

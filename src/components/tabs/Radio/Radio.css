@@ -1,39 +1,103 @@
 .radio {
   display: flex;
   height: 100%;
-  gap: 10px;
-  padding: 8px 10px 8px;
+  gap: 12px;
+  padding: 10px;
 }
 
-/* ---------- LEFT COLUMN: tuner + station list ---------- */
+/* ---------- Two-column layout ---------- */
 
-.radio__panel {
+.radio__left-col {
   flex: 0 0 27%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  padding: 12px 12px 10px;
+  gap: 10px;
+}
+
+.radio__right-col {
+  flex: 1 1 73%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- Base panel with HUD corners ---------- */
+
+.radio__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--pipboy-color-deep);
-  background: linear-gradient(
-    180deg,
-    rgba(30, 255, 0, 0.025),
-    rgba(30, 255, 0, 0.01)
-  );
+  background: rgba(30, 255, 0, 0.03);
+  overflow: hidden;
+}
+
+/* HUD corner marks — reused from LocationPanel pattern */
+.radio__corners {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border: 1px solid var(--pipboy-color-deep);
+}
+
+.radio__corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--pipboy-color-glow);
+  border-style: solid;
+  opacity: 0.85;
+}
+
+.radio__corner--tl {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 3px 0 0 0;
+}
+
+.radio__corner--tr {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 3px 0 0;
+}
+
+.radio__corner--bl {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+  border-radius: 0 0 0 3px;
+}
+
+.radio__corner--br {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 3px 0;
+}
+
+/* ---------- Tuner panel (top-left) ---------- */
+
+.radio__panel--tuner {
+  flex-shrink: 0;
 }
 
 .radio__dial {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding-bottom: 4px;
+  gap: 10px;
+  padding: 14px 12px 12px;
 }
 
 .radio__dial-title {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   letter-spacing: 0.26em;
   color: var(--pipboy-color-faint);
+  text-transform: uppercase;
 }
 
 .radio__knob-wrap {
@@ -57,7 +121,9 @@
     rgba(30, 255, 0, 0.04) 62%,
     rgba(30, 255, 0, 0.1) 100%
   );
-  box-shadow: 0 0 12px var(--pipboy-color-glow),
+  box-shadow:
+    0 0 18px var(--pipboy-color-glow),
+    0 0 36px rgba(30, 255, 0, 0.25),
     inset 0 0 18px rgba(30, 255, 0, 0.12);
 }
 
@@ -73,46 +139,108 @@
   background: rgba(30, 255, 0, 0.22);
 }
 
+/* Tick marks around the dial */
+.radio__knob-ticks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  pointer-events: none;
+}
+
+.radio__knob-tick {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  transform-origin: center 46px;
+  background: var(--pipboy-color-faint);
+  opacity: 0.6;
+}
+
+.radio__knob-tick--major {
+  height: 10px;
+  background: var(--pipboy-color-subtle);
+  opacity: 0.9;
+}
+
+.radio__knob-tick--minor {
+  height: 5px;
+  background: var(--pipboy-color-faint);
+  opacity: 0.5;
+}
+
 .radio__knob-hand {
   position: absolute;
-  top: 48px;
+  top: 50%;
   left: 50%;
-  width: 3px;
-  height: 32px;
-  margin-left: -1.5px;
-  background: var(--pipboy-color);
-  box-shadow: 0 0 6px var(--pipboy-color-glow);
+  width: 2px;
+  height: 38px;
+  margin: -36px 0 0 -1px;
+  background: linear-gradient(
+    180deg,
+    var(--pipboy-color) 0%,
+    var(--pipboy-color-dim) 100%
+  );
+  box-shadow:
+    0 0 8px var(--pipboy-color-glow),
+    0 0 16px rgba(30, 255, 0, 0.4);
   transform: rotate(var(--knob-angle, 0deg));
   transform-origin: center bottom;
   transition: transform 0.6s steps(9, end);
+  z-index: 2;
+}
+
+.radio__knob-hand::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  margin-left: -5px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid var(--pipboy-color);
+  filter: drop-shadow(0 2px 4px var(--pipboy-color-glow));
 }
 
 .radio__knob-hand::after {
   content: '';
   position: absolute;
-  top: -3px;
-  left: -2.5px;
-  width: 8px;
-  height: 8px;
+  bottom: 8px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
   background: var(--pipboy-color);
-  box-shadow: 0 0 8px var(--pipboy-color-glow);
+  box-shadow:
+    0 0 6px var(--pipboy-color-glow),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .radio__knob-mark {
   position: absolute;
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
   color: var(--pipboy-color-faint);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
+  pointer-events: none;
 }
 
 .radio__knob-mark--a {
-  top: 4px;
-  left: 28px;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .radio__knob-mark--b {
-  bottom: 4px;
-  right: 24px;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .radio__freq {
@@ -121,6 +249,15 @@
   letter-spacing: 0.08em;
   color: var(--pipboy-color);
   text-shadow: 0 0 8px var(--pipboy-color-glow);
+  background: rgba(3, 11, 0, 0.85);
+  border: 1px solid var(--pipboy-color-deep);
+  box-shadow:
+    inset 0 0 12px rgba(30, 255, 0, 0.08),
+    0 0 12px rgba(30, 255, 0, 0.15);
+  padding: 6px 14px 8px;
+  border-radius: 4px;
+  min-width: 90px;
+  text-align: center;
 }
 
 .radio__freq-unit {
@@ -162,17 +299,20 @@
   color: var(--pipboy-color-faint);
 }
 
-/* ---------- LEFT COLUMN: station list ---------- */
+/* ---------- Station list panel (bottom-left) ---------- */
+
+.radio__panel--list {
+  flex: 1;
+  min-height: 0;
+}
 
 .radio__list {
   flex: 1;
   min-height: 0;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--pipboy-color-deep);
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -258,30 +398,20 @@
   border-color: var(--pipboy-color-glow);
 }
 
-/* ---------- RIGHT COLUMN: display ---------- */
+/* ---------- Oscilloscope panel (top-right) ---------- */
 
-.radio__display {
-  flex: 1 1 73%;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--pipboy-color-deep);
-  background: linear-gradient(
-    180deg,
-    rgba(30, 255, 0, 0.025),
-    rgba(30, 255, 0, 0.01)
-  );
+.radio__panel--scope {
+  flex: 1 1 auto;
+  min-height: clamp(280px, 55vh, 480px);
 }
 
-.radio__stage {
-  position: relative;
+.radio__scope-panel {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 16px 14px;
+  padding: 14px 16px 12px;
 }
 
 .radio__now {
@@ -321,11 +451,10 @@
   white-space: nowrap;
 }
 
-/* ---------- oscilloscope (the protagonist) ---------- */
-
+/* Oscilloscope — protagonist with inset shadow for "screen within screen" */
 .radio__scope-wrap {
   flex: 1 1 auto;
-  min-height: clamp(200px, 42vh, 60vh);
+  min-height: clamp(180px, 38vh, 40vh);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -346,13 +475,25 @@
   width: 100%;
   background: transparent;
   border: 1px solid var(--pipboy-color-deep);
-  box-shadow: inset 0 0 16px rgba(30, 255, 0, 0.045);
+  box-shadow:
+    inset 0 0 24px rgba(30, 255, 0, 0.06),
+    inset 0 0 4px rgba(0, 0, 0, 0.6);
 }
 
-/* ---------- transport controls ---------- */
+/* ---------- Controls panel (bottom-right) ---------- */
+
+.radio__panel--controls {
+  flex-shrink: 0;
+}
+
+.radio__controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+}
 
 .radio__transport {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -389,10 +530,7 @@
   font-size: 0.95rem;
 }
 
-/* ---------- volume ---------- */
-
 .radio__volume {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -412,7 +550,7 @@
   color: var(--pipboy-color);
 }
 
-/* ---------- sliders ---------- */
+/* ---------- Sliders ---------- */
 
 input[type='range'].radio__seek,
 input[type='range'].radio__volume-slider {
@@ -465,7 +603,7 @@ input[type='range'].radio__volume-slider::-moz-range-thumb {
   box-shadow: 0 0 8px var(--pipboy-color-glow);
 }
 
-/* ---------- missing signal ---------- */
+/* ---------- Missing signal ---------- */
 
 .radio__missing {
   display: flex;
@@ -501,7 +639,7 @@ input[type='range'].radio__volume-slider::-moz-range-thumb {
   color: var(--pipboy-color-dim);
 }
 
-/* ---------- tuning overlay ---------- */
+/* ---------- Tuning overlay ---------- */
 
 .radio__tune {
   position: absolute;

@@ -17,10 +17,11 @@ import {
   MIN_ROWS,
   applyDud,
   applyGuess,
+  applyInvalidSelection,
   createGame,
   parseLineTokens,
 } from './hackGame'
-import type { BoardLine, Game } from './hackGame'
+import type { BoardLine, Game, LineToken } from './hackGame'
 import type { DifficultyId } from './hackTypes'
 import { getBucketsSync, loadDictionary } from './words'
 import './HackView.css'
@@ -160,90 +161,176 @@ export function HackView() {
     playSfx(dudSfx)
   }
 
-  const renderLine = (line: BoardLine) => {
+const renderLine = (line: BoardLine) => {
     const tokens = parseLineTokens(line)
-    const children: ReactNode[] = []
-    let cursor = 0
     const lineKey = `${line.column}-${line.row}`
+    const content = line.content
 
+    const charTokenMap: Map<number, { token: LineToken; isFirst: boolean }> = new Map()
     tokens.forEach((token) => {
-      if (token.start > cursor) {
-        children.push(
-          <span key={`noise-${lineKey}-${cursor}`}>
-            {line.content.slice(cursor, token.start)}
-          </span>,
-        )
+      for (let i = token.start; i < token.end; i++) {
+        charTokenMap.set(i, { token, isFirst: i === token.start })
       }
+    })
 
-      const isDud = token.kind === 'dud'
-      const dudUsed = game ? game.usedDuds.has(token.id) : false
+    const handleInvalidClick = () => {
+      if (!game || game.phase !== 'playing') return
+      const next = applyInvalidSelection(game)
+      setGame(next)
+      playSfx(clickSfx)
+    }
 
-      if (isDud) {
-        if (dudUsed) {
-          children.push(
+    const chars: ReactNode[] = []
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i]
+      const tokenInfo = charTokenMap.get(i)
+      const charKey = `${lineKey}-${i}`
+
+      if (tokenInfo) {
+        const { token, isFirst } = tokenInfo
+        const isDud = token.kind === 'dud'
+        const dudUsed = game ? game.usedDuds.has(token.id) : false
+
+        if (isDud && dudUsed) {
+          chars.push(
             <span
-              key={token.id}
-              className="hack-token hack-token--dud hack-token--dud--used"
+              key={charKey}
+              className="hack-token hack-token--dud hack-token--dud--used hack-char"
+              data-token-id={token.id}
+              data-char-index={i - token.start}
+              data-token-start={token.start}
+              data-token-end={token.end}
             >
-              {token.text}
+              {char}
             </span>,
           )
-} else {
-           children.push(
-             <span
-               key={token.id}
-               className="hack-token hack-token--dud"
-               onClick={(e) => {
-                const target = e.currentTarget as HTMLElement
-                const rect = target.getBoundingClientRect()
-                const clickX = e.clientX - rect.left
-                const charWidth = rect.width / token.text.length
-                const clickedCharIndex = Math.floor(clickX / charWidth)
-                if (clickedCharIndex === 0) {
+        } else if (isDud) {
+          const struck = false
+          chars.push(
+            <span
+              key={charKey}
+              className={`hack-token hack-token--dud hack-char${isFirst ? ' hack-token--first-char' : ''}${struck ? ' hack-token--struck' : ''}`}
+              data-token-id={token.id}
+              data-char-index={i - token.start}
+              data-token-start={token.start}
+              data-token-end={token.end}
+onMouseEnter={(_e) => {
+                  if (isFirst) {
+                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
+                      (el as HTMLElement).dataset.hovered = 'true'
+                    })
+                  } else {
+                    const target = _e.currentTarget as HTMLElement
+                    target.dataset.hovered = 'true'
+                  }
+                }}
+                onMouseLeave={(_e) => {
+                  if (isFirst) {
+                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
+                      delete (el as HTMLElement).dataset.hovered
+                    })
+                  } else {
+                    const target = _e.currentTarget as HTMLElement
+                    delete target.dataset.hovered
+                  }
+                }}
+                onClick={() => {
+                if (isFirst) {
                   handleDud(token.id)
+                } else {
+                  handleInvalidClick()
                 }
               }}
             >
-              {token.text}
+              {char}
             </span>,
           )
+        } else {
+          const wordIndex = token.wordIndex as number
+          const removed = game ? game.removed.has(wordIndex) : false
+          const struck = game ? game.struck.has(wordIndex) : false
+
+          if (removed) {
+            chars.push(
+              <span
+                key={charKey}
+                className="hack-token hack-token--word hack-char"
+                data-token-id={token.id}
+                data-char-index={i - token.start}
+                data-token-start={token.start}
+                data-token-end={token.end}
+              >
+                {char}
+              </span>,
+            )
+          } else {
+            const displayChar = struck ? '.' : char
+            chars.push(
+              <span
+                key={charKey}
+                className={`hack-token hack-token--word hack-char${isFirst ? ' hack-token--first-char' : ''}${struck ? ' hack-token--struck' : ''}`}
+                data-token-id={token.id}
+                data-char-index={i - token.start}
+                data-token-start={token.start}
+                data-token-end={token.end}
+                onMouseEnter={(_e) => {
+                  if (isFirst) {
+                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
+                      (el as HTMLElement).dataset.hovered = 'true'
+                    })
+                  } else {
+                    const target = _e.currentTarget as HTMLElement
+                    target.dataset.hovered = 'true'
+                  }
+                }}
+                onMouseLeave={(_e) => {
+                  if (isFirst) {
+                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
+                      delete (el as HTMLElement).dataset.hovered
+                    })
+                  } else {
+                    const target = _e.currentTarget as HTMLElement
+                    delete target.dataset.hovered
+                  }
+                }}
+                onClick={() => {
+                  if (isFirst) {
+                    handleGuess(wordIndex)
+                  } else {
+                    handleInvalidClick()
+                  }
+                }}
+              >
+                {displayChar}
+              </span>,
+            )
+          }
         }
       } else {
-        const wordIndex = token.wordIndex as number
-        const removed = game ? game.removed.has(wordIndex) : false
-        const struck = game ? game.struck.has(wordIndex) : false
-
-        if (removed) {
-          children.push(<span key={token.id}>{token.text}</span>)
-        } else {
-          const displayText = struck ? '.'.repeat(token.text.length) : token.text
-          children.push(
-            <span
-              key={token.id}
-              className={`hack-token hack-token--word${struck ? ' hack-token--struck' : ''}`}
-              onClick={() => handleGuess(wordIndex)}
-            >
-              {displayText}
-            </span>,
-          )
-        }
+        chars.push(
+          <span
+            key={charKey}
+            className="hack-char hack-char--noise"
+            onMouseEnter={(_e) => {
+              const target = _e.currentTarget as HTMLElement
+              target.dataset.hovered = 'true'
+            }}
+            onMouseLeave={(_e) => {
+              const target = _e.currentTarget as HTMLElement
+              delete target.dataset.hovered
+            }}
+            onClick={handleInvalidClick}
+          >
+            {char}
+          </span>,
+        )
       }
-
-      cursor = token.end
-    })
-
-    if (cursor < line.content.length) {
-      children.push(
-        <span key={`noise-end-${lineKey}-${cursor}`}>
-          {line.content.slice(cursor)}
-        </span>,
-      )
     }
 
     return (
       <div key={lineKey} className="terminal__line">
         <span className="terminal__addr">{line.address}</span>
-        <span className="terminal__content">{children}</span>
+        <span className="terminal__content">{chars}</span>
       </div>
     )
   }

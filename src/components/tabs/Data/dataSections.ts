@@ -2,7 +2,6 @@ export type DataSectionId =
   | 'ABOUT'
   | 'EDUCATION'
   | 'EXPERIENCE'
-  | 'PROJECTS'
   | 'CONTACT'
 
 export interface DataEntry {
@@ -195,63 +194,6 @@ const CONTACT_ENTRIES: readonly DataEntry[] = [
   },
 ]
 
-const PROJECT_ENTRIES: readonly DataEntry[] = [
-  {
-    id: 'proj-vault',
-    name: 'PROJ_VAULT.MOD',
-    lines: [
-      'NOMBRE ..........: VAULT ARCHIVE',
-      'TIPO ............: INTERFAZ PIP-BOY / PORTFOLIO',
-      'ESTADO ..........: EN DESARROLLO ACTIVO',
-      '',
-      'Recreación funcional de la interfaz Pip-Boy 3000',
-      'como portfolio técnico interactivo. Incluye:',
-      '- Navegación por tabs/subtabs estilo Fallout',
-      '- Mapa con marcadores y indicadores off-screen',
-      '- Terminal de hackeo con diccionario dinámico',
-      '- Radio con visualizador de onda y ecualizador',
-      '- Sistema CRT con scanlines y efectos de boot',
-      '',
-      'STACK: React 19, TypeScript, Vite, Mapbox GL',
-      'CSS custom properties, animaciones steps()',
-    ],
-  },
-  {
-    id: 'proj-dnd',
-    name: 'PROJ_DND_TOOLS.MOD',
-    lines: [
-      'NOMBRE ..........: D&D SESSION TOOLS',
-      'TIPO ............: HERRAMIENTAS DE MESA',
-      'ESTADO ..........: PROTOTIPO',
-      '',
-      'Conjunto de utilidades para Director de Juego:',
-      '- Generador de encuentros balanceados',
-      '- Calculadora de experiencia y tesoro',
-      '- Seguimiento de iniciativa y condiciones',
-      '- Integración con SRD 5.1',
-      '',
-      'STACK: TypeScript, Node.js, CLI',
-    ],
-  },
-  {
-    id: 'proj-ai',
-    name: 'PROJ_IA_EXPERIMENTS.MOD',
-    lines: [
-      'NOMBRE ..........: IA EXPERIMENTS',
-      'TIPO ............: INVESTIGACIÓN / PROTOTIPOS',
-      'ESTADO ..........: EXPERIMENTAL',
-      '',
-      'Experimentos locales con modelos LLM:',
-      '- RAG sobre documentación técnica privada',
-      '- Agentes para refactorización asistida',
-      '- Generación de tests a partir de código',
-      '- Evaluación de modelos cuantizados (GGUF)',
-      '',
-      'STACK: Python, Ollama, LangChain, llama.cpp',
-    ],
-  },
-]
-
 export const DATA_SECTIONS: readonly DataSectionInfo[] = [
   {
     id: 'ABOUT',
@@ -270,12 +212,6 @@ export const DATA_SECTIONS: readonly DataSectionInfo[] = [
     label: 'EXPERIENCE',
     path: 'SYS:\\VAULT\\REGISTROS\\EXPERIENCE\\',
     entries: EXPERIENCE_ENTRIES,
-  },
-  {
-    id: 'PROJECTS',
-    label: 'PROJECTS',
-    path: 'SYS:\\VAULT\\REGISTROS\\PROJECTS\\',
-    entries: PROJECT_ENTRIES,
   },
   {
     id: 'CONTACT',

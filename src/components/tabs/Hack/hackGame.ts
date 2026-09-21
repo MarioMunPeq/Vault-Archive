@@ -557,3 +557,28 @@ export function isDudUsed(game: Game, slot: MemorySlot): boolean {
 export function isWordRemoved(game: Game, slot: MemorySlot): boolean {
   return slot.wordIndex !== undefined && game.removed.has(slot.wordIndex)
 }
+
+/**
+ * Handles an invalid selection (clicking on noise or non-first character of a token).
+ * Costs an attempt, logs a generic failure message, and blocks the terminal on 4th failure.
+ */
+export function applyInvalidSelection(game: Game): Game {
+  if (game.phase !== 'playing') return game
+
+  const attemptsUsed = game.attemptsUsed + 1
+  const phase = attemptsUsed >= MAX_ATTEMPTS ? 'blocked' : 'playing'
+
+  const log = [
+    ...game.log,
+    '>INVALID SELECTION',
+    '>Entry Denied',
+  ]
+  if (phase === 'blocked') log.push('>Attempt(s) Remaining: 0')
+
+  return {
+    ...game,
+    attemptsUsed,
+    phase,
+    log,
+  }
+}

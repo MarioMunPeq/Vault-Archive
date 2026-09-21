@@ -1,7 +1,9 @@
 import {
   type SimpleIcon,
+  siAndroidstudio,
   siDotnet,
   siGit,
+  siGodotengine,
   siJavascript,
   siKotlin,
   siMysql,
@@ -27,13 +29,16 @@ const PERKS: readonly Perk[] = [
   { id: 'react', name: 'REACT', tag: 'FRAMEWORK', icon: siReact },
   { id: 'sql', name: 'SQL', tag: 'BASE DE DATOS', icon: siMysql },
   { id: 'git', name: 'GIT', tag: 'CONTROL DE VERSIONES', icon: siGit },
+  { id: 'godot', name: 'GODOT', tag: 'MOTOR DE JUEGOS', icon: siGodotengine },
+  { id: 'androidstudio', name: 'ANDROID STUDIO', tag: 'IDE', icon: siAndroidstudio },
 ]
 
-// Two rows of four, offset a few px so the grid reads hand-placed like the
+// Three rows: 4 + 3 + 3, offset so the grid reads hand-placed like the
 // SPECIAL screen.
 const PERK_ROWS: readonly (readonly number[])[] = [
   [0, 1, 2, 3],
-  [4, 5, 6, 7],
+  [4, 5, 6],
+  [7, 8, 9],
 ]
 
 export function PerksView() {
