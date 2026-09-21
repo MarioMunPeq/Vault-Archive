@@ -26,7 +26,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm build
+      - name: Build
+        run: pnpm build
+        env:
+          VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+          VITE_MAPBOX_STYLE_URL: ${{ secrets.VITE_MAPBOX_STYLE_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
