@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { TabNav } from '../../TabNav/TabNav'
 import submoduleChangeSfx from '../../../assets/sfx/submodule_change.ogg'
 import clickSfx from '../../../assets/sfx/mechanical-click.wav'
@@ -17,10 +18,9 @@ import {
   applyDud,
   applyGuess,
   createGame,
-  isDudUsed,
-  isWordRemoved,
+  parseLineTokens,
 } from './hackGame'
-import type { BoardLine, Game, MemorySlot } from './hackGame'
+import type { BoardLine, Game } from './hackGame'
 import type { DifficultyId } from './hackTypes'
 import { getBucketsSync, loadDictionary } from './words'
 import './HackView.css'
@@ -151,74 +151,97 @@ export function HackView() {
     setDifficultyId(next.id)
   }
 
-  const handleGuess = (slot: MemorySlot) => {
-    if (!game || game.phase !== 'playing' || slot.wordIndex === undefined) return
-    const next = applyGuess(game, slot.wordIndex)
+  const handleGuess = (wordIndex: number) => {
+    if (!game || game.phase !== 'playing') return
+    const next = applyGuess(game, wordIndex)
     setGame(next)
     if (next.phase === 'accessing') playSfx(okSfx)
     else if (next.phase === 'blocked') playSfx(blockedSfx)
     else playSfx(clickSfx)
   }
 
-  const handleDud = (slot: MemorySlot) => {
+  const handleDud = (slotId: string) => {
     if (!game || game.phase !== 'playing') return
-    setGame(applyDud(game, slot.id))
+    setGame(applyDud(game, slotId))
     playSfx(dudSfx)
   }
 
-  const renderLine = (line: BoardLine) => (
-    <div key={`${line.column}-${line.row}`} className="terminal__line">
-      <span className="terminal__addr">{line.address}</span>
-      <span className="terminal__content">
-        {line.segments.map((segment, index) => {
-          if (segment.kind === 'noise') {
-            return <span key={index}>{segment.text}</span>
-          }
+  const renderLine = (line: BoardLine) => {
+    const tokens = parseLineTokens(line)
+    const children: ReactNode[] = []
+    let cursor = 0
 
-          const slot = segment.slot as MemorySlot
-          if (slot.kind === 'dud') {
-            if (game && isDudUsed(game, slot)) {
-              return (
-                <span
-                  key={index}
-                  className="hack-word hack-word--dud hack-word--dud--used"
-                >
-                  {segment.text}
-                </span>
-              )
-            }
-            return (
-              <button
-                key={index}
-                type="button"
-                className="hack-word hack-word--dud"
-                onClick={() => handleDud(slot)}
-              >
-                {segment.text}
-              </button>
-            )
-          }
+    tokens.forEach((token) => {
+      if (token.start > cursor) {
+        children.push(
+          <span key={`noise-${line.column}-${line.row}-${cursor}`}>
+            {line.content.slice(cursor, token.start)}
+          </span>,
+        )
+      }
 
-          if (game && isWordRemoved(game, slot)) {
-            return <span key={index}>{segment.text}</span>
-          }
-
-          const struck = game ? game.struck.has(slot.wordIndex as number) : false
-          return (
+      if (token.kind === 'dud') {
+        const used = game ? game.usedDuds.has(token.id) : false
+        if (used) {
+          children.push(
+            <span
+              key={token.id}
+              className="hack-word hack-word--dud hack-word--dud--used"
+            >
+              {token.text}
+            </span>,
+          )
+        } else {
+          children.push(
             <button
-              key={index}
+              key={token.id}
+              type="button"
+              className="hack-word hack-word--dud"
+              onClick={() => handleDud(token.id)}
+            >
+              {token.text}
+            </button>,
+          )
+        }
+      } else {
+        const wordIndex = token.wordIndex as number
+        const removed = game ? game.removed.has(wordIndex) : false
+        const struck = game ? game.struck.has(wordIndex) : false
+        if (removed) {
+          children.push(<span key={token.id}>{token.text}</span>)
+        } else {
+          children.push(
+            <button
+              key={token.id}
               type="button"
               className={struck ? 'hack-word hack-word--struck' : 'hack-word'}
               disabled={struck}
-              onClick={() => handleGuess(slot)}
+              onClick={() => handleGuess(wordIndex)}
             >
-              {segment.text}
-            </button>
+              {token.text}
+            </button>,
           )
-        })}
-      </span>
-    </div>
-  )
+        }
+      }
+
+      cursor = token.end
+    })
+
+    if (cursor < line.content.length) {
+      children.push(
+        <span key={`noise-end-${line.column}-${line.row}-${cursor}`}>
+          {line.content.slice(cursor)}
+        </span>,
+      )
+    }
+
+    return (
+      <div key={`${line.column}-${line.row}`} className="terminal__line">
+        <span className="terminal__addr">{line.address}</span>
+        <span className="terminal__content">{children}</span>
+      </div>
+    )
+  }
 
   if (loadState === 'loading') {
     return (

@@ -4,6 +4,7 @@ import { playSfx } from '../../../utils/sfx'
 import clickSfx from '../../../assets/sfx/mechanical-click.wav'
 import tuneSfx from '../../../assets/sfx/electric-hum.wav'
 import { RADIO_STATIONS, radioSession } from './radioStations'
+import { RadioScope } from './RadioScope'
 import './Radio.css'
 
 export function Radio() {
@@ -235,6 +236,8 @@ export function Radio() {
               </p>
             </div>
           )}
+
+          <RadioScope audioRef={audioRef} isPlaying={isPlaying} />
 
           <div className="radio__volume">
             <span className="radio__volume-label">VOL</span>

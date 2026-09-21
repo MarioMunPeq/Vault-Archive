@@ -101,6 +101,97 @@ export interface BoardLine {
   segments: readonly BoardSegment[]
 }
 
+/**
+ * One selectable token inside a board line. Every candidate word and every
+ * complete matching bracket pair (`<...>`, `{...}`, `[...]`, `(...)`) is a
+ * separate token; anything else is inert noise.
+ */
+export interface LineToken {
+  /** Column in the line's content where the token starts. */
+  start: number
+  /** Column just after the token (exclusive end). */
+  end: number
+  text: string
+  kind: MemorySlotKind
+  /** Index into Game.candidates, set on `word` tokens. */
+  wordIndex?: number
+  /** Stable id (words reuse their slot id, duds encode line + range). */
+  id: string
+}
+
+/** Opening bracket -> the closing bracket that completes the dud pair. */
+const DUD_OPENER: Record<string, string> = {
+  '<': '>',
+  '{': '}',
+  '[': ']',
+  '(': ')',
+}
+
+/**
+ * Parses one board line into selectable tokens by scanning the full rendered
+ * text once, before drawing. Words come from the placed slots; every matching
+ * bracket pair anywhere in the content (even pairs hidden inside the noise)
+ * becomes its own dud token, exactly like the real terminal. A bracket without
+ * its same-type closer on the same line is pure inert noise, never a token.
+ * A pair is only a dud when no candidate word sits between its brackets, so a
+ * word is always selectable on its own.
+ */
+export function parseLineTokens(line: BoardLine): LineToken[] {
+  const content = line.content
+  const words = line.segments
+    .filter((segment) => segment.kind === 'word')
+    .map((segment) => ({
+      start: segment.start,
+      end: segment.start + segment.text.length,
+      wordIndex: (segment.slot as MemorySlot).wordIndex as number,
+      id: (segment.slot as MemorySlot).id,
+    }))
+    .sort((a, b) => a.start - b.start)
+
+  const tokens: LineToken[] = []
+  let cursor = 0
+
+  while (cursor < content.length) {
+    const word = words.find((w) => w.start === cursor)
+    if (word) {
+      tokens.push({
+        start: word.start,
+        end: word.end,
+        text: content.slice(word.start, word.end),
+        kind: 'word',
+        wordIndex: word.wordIndex,
+        id: word.id,
+      })
+      cursor = word.end
+      continue
+    }
+
+    const closer = DUD_OPENER[content[cursor]]
+    if (closer) {
+      const close = content.indexOf(closer, cursor + 1)
+      const spansWord = close !== -1 && words.some(
+        (w) => w.start > cursor && w.start < close + 1,
+      )
+      if (close !== -1 && !spansWord) {
+        const end = close + 1
+        tokens.push({
+          start: cursor,
+          end,
+          text: content.slice(cursor, end),
+          kind: 'dud',
+          id: `d${line.column}-${line.row}:${cursor}:${end}`,
+        })
+        cursor = end
+        continue
+      }
+    }
+
+    cursor++
+  }
+
+  return tokens
+}
+
 export interface Game {
   difficulty: Difficulty
   wordLen: number

@@ -158,9 +158,8 @@
 
 .hack-word:not(:disabled):hover,
 .hack-word--dud:hover {
-  color: var(--screen-bg);
-  background: var(--pipboy-color);
-  text-shadow: none;
+  color: #f0fff0;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
 }
 
 .hack-word:disabled {

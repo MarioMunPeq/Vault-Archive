@@ -17,6 +17,7 @@
     "mapbox-gl": "^3.31.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "simple-icons": "^16.32.0",
     "word-list": "^4.1.0"
   },
   "devDependencies": {

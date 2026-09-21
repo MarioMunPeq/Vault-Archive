@@ -1,20 +1,32 @@
+import {
+  type SimpleIcon,
+  siDotnet,
+  siGit,
+  siJavascript,
+  siKotlin,
+  siMysql,
+  siOpenjdk,
+  siPython,
+  siReact,
+} from 'simple-icons'
 import './PerksView.css'
 
 interface Perk {
   id: string
   name: string
   tag: string
+  icon: SimpleIcon
 }
 
 const PERKS: readonly Perk[] = [
-  { id: 'java', name: 'JAVA', tag: 'LENGUAJE' },
-  { id: 'python', name: 'PYTHON', tag: 'LENGUAJE' },
-  { id: 'kotlin', name: 'KOTLIN', tag: 'LENGUAJE' },
-  { id: 'csharp', name: 'C#', tag: 'LENGUAJE' },
-  { id: 'ts', name: 'JAVASCRIPT', tag: 'TYPESCRIPT' },
-  { id: 'react', name: 'REACT', tag: 'FRAMEWORK' },
-  { id: 'sql', name: 'SQL', tag: 'BASE DE DATOS' },
-  { id: 'git', name: 'GIT', tag: 'CONTROL DE VERSIONES' },
+  { id: 'java', name: 'JAVA', tag: 'LENGUAJE', icon: siOpenjdk },
+  { id: 'python', name: 'PYTHON', tag: 'LENGUAJE', icon: siPython },
+  { id: 'kotlin', name: 'KOTLIN', tag: 'LENGUAJE', icon: siKotlin },
+  { id: 'csharp', name: 'C#', tag: 'LENGUAJE', icon: siDotnet },
+  { id: 'ts', name: 'JAVASCRIPT', tag: 'TYPESCRIPT', icon: siJavascript },
+  { id: 'react', name: 'REACT', tag: 'FRAMEWORK', icon: siReact },
+  { id: 'sql', name: 'SQL', tag: 'BASE DE DATOS', icon: siMysql },
+  { id: 'git', name: 'GIT', tag: 'CONTROL DE VERSIONES', icon: siGit },
 ]
 
 // Two rows of four, offset a few px so the grid reads hand-placed like the
@@ -35,6 +47,15 @@ export function PerksView() {
               const perk = PERKS[perkIndex]
               return (
                 <div key={perk.id} className="perks-cell">
+                  <svg
+                    className="perks-cell__icon"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d={perk.icon.path} />
+                  </svg>
                   <span className="perks-cell__name">{perk.name}</span>
                   <span className="perks-cell__tag">{perk.tag}</span>
                 </div>
