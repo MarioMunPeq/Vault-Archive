@@ -172,49 +172,58 @@ interface ConditionItem {
 }
 
 const CONDITIONS: readonly ConditionItem[] = [
-  { icon: GUN_ICON, label: 'Arma', value: '86/100' },
-  { icon: ARMOR_ICON, label: 'Armadura', value: '54/100' },
-  { icon: RAD_ICON, label: 'Resist. RAD', value: '25' },
-  { icon: HELMET_ICON, label: 'Casco', value: '—' },
+  { icon: GUN_ICON, label: 'AMMO', value: '100%' },
+  { icon: ARMOR_ICON, label: 'ARMOR', value: '54/100' },
+  { icon: RAD_ICON, label: 'RADIATION', value: '25' },
+  { icon: HELMET_ICON, label: 'HELMET', value: '—' },
 ]
 
 export function StatusView() {
   return (
     <div className="status">
-      <section className="status__special" aria-label="Atributos S.P.E.C.I.A.L.">
-        <h2 className="status__special-title">S.P.E.C.I.A.L.</h2>
-        <div className="special-grid">
-          {SPECIAL_ROWS.map((row, rowIndex) => (
-            <div
-              key={rowIndex}
-              className={`special-row special-row--${rowIndex + 1}`}
-            >
-              {row.map((statIndex) => {
-                const stat = SPECIAL_STATS[statIndex]
-                return (
-                  <div
-                    key={stat.id}
-                    className="special-cell"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`${stat.name}, ${stat.value}`}
-                  >
-                    <span className="special-cell__sigla">{stat.id}</span>
-                    <SpriteLoop
-                      className="special-cell__icon"
-                      frames={stat.frames}
-                    />
-                    <span className="special-cell__value">{stat.value}</span>
-                  </div>
-                )
-              })}
-            </div>
-          ))}
+      <header className="status__header">
+        <div className="status__identity">
+          <p className="status__name">Mario Muñoz Pequeño</p>
+          <p className="status__class">CLASS: Software Developer</p>
         </div>
-      </section>
+        <div className="status__special-header">
+          <h2 className="status__special-title">S.P.E.C.I.A.L.</h2>
+        </div>
+      </header>
 
-      <section className="status__identity">
-        <div className="status__character">
+      <main className="status__main">
+        <section className="status__special" aria-label="Atributos S.P.E.C.I.A.L.">
+          <div className="special-grid">
+            {SPECIAL_ROWS.map((row, rowIndex) => (
+              <div
+                key={rowIndex}
+                className={`special-row special-row--${rowIndex + 1}`}
+              >
+                {row.map((statIndex) => {
+                  const stat = SPECIAL_STATS[statIndex]
+                  return (
+                    <div
+                      key={stat.id}
+                      className="special-cell"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${stat.name}, ${stat.value}`}
+                    >
+                      <span className="special-cell__sigla">{stat.id}</span>
+                      <SpriteLoop
+                        className="special-cell__icon"
+                        frames={stat.frames}
+                      />
+                      <span className="special-cell__value">{stat.value}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <aside className="status__sidebar">
           <div className="status__conditions">
             {CONDITIONS.map((condition) => (
               <div key={condition.label} className="status-condition">
@@ -222,16 +231,17 @@ export function StatusView() {
                   className="status-condition__icon"
                   dangerouslySetInnerHTML={{ __html: condition.icon }}
                 />
-                <span className="status-condition__value">{condition.value}</span>
+                <div className="status-condition__info">
+                  <span className="status-condition__label">{condition.label}</span>
+                  <span className="status-condition__value">{condition.value}</span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-        <p className="status__name">Mario Muñoz Pequeño</p>
-        <p className="status__class">CLASS: Software Developer</p>
-      </section>
+        </aside>
+      </main>
 
-      <section className="status__footer">
+      <footer className="status__footer">
         <div className="status__stats">
           <div className="status__stat">
             <span className="status__stat-label">HP</span>
@@ -239,14 +249,14 @@ export function StatusView() {
           </div>
           <div className="status__stat">
             <span className="status__stat-label">LEVEL</span>
-            <span className="status__stat-value">6</span>
+            <span className="status__stat-value">24</span>
           </div>
           <div className="status__stat">
             <span className="status__stat-label">AP</span>
             <span className="status__stat-value">90/90</span>
           </div>
         </div>
-      </section>
+      </footer>
     </div>
   )
 }

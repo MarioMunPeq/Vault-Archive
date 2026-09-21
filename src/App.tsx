@@ -9,7 +9,6 @@ import { Radio } from './components/tabs/Radio/Radio'
 import { RadioProvider } from './components/tabs/Radio/RadioProvider'
 import { Map } from './components/tabs/Map/Map'
 import { HackView } from './components/tabs/Hack/HackView'
-import { StatusBar } from './components/StatusBar/StatusBar'
 import { useActiveTab } from './hooks/useActiveTab'
 import { playSfx } from './utils/sfx'
 import './App.css'
@@ -89,7 +88,6 @@ function App() {
                   </div>
                 )}
               </div>
-              {activeTab !== 'MAP' && <StatusBar />}
             </div>
           )}
         </Screen>
