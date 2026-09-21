@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { TabNav } from '../../TabNav/TabNav'
 import submoduleChangeSfx from '../../../assets/sfx/submodule_change.ogg'
 import clickSfx from '../../../assets/sfx/mechanical-click.wav'
@@ -8,14 +8,19 @@ import dudSfx from '../../../assets/sfx/computer-beep.wav'
 import restartSfx from '../../../assets/sfx/toggle-switch.mp3'
 import { playSfx } from '../../../utils/sfx'
 import {
+  DEFAULT_COLS,
+  DEFAULT_ROWS,
   DIFFICULTIES,
   MAX_ATTEMPTS,
+  MIN_COLS,
+  MIN_ROWS,
   applyDud,
   applyGuess,
   createGame,
+  isDudUsed,
   isWordRemoved,
 } from './hackGame'
-import type { Game, Slot } from './hackGame'
+import type { BoardLine, Game, MemorySlot } from './hackGame'
 import type { DifficultyId } from './hackTypes'
 import { getBucketsSync, loadDictionary } from './words'
 import './HackView.css'
@@ -23,37 +28,38 @@ import './HackView.css'
 const DIFFICULTY_LABELS = DIFFICULTIES.map((difficulty) => difficulty.label)
 const BOOT_TEXT =
   'ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL\nENTER PASSWORD NOW'
+const PROBE_TEXT = 'MMMMMMMMMM'
+
+interface BoardSize {
+  cols: number
+  rows: number
+}
 
 export function HackView() {
   const [difficultyId, setDifficultyId] = useState<DifficultyId>('novato')
-  const [game, setGame] = useState<Game | null>(() => {
-    const buckets = getBucketsSync()
-    return buckets ? createGame('novato', buckets) : null
-  })
+  const [game, setGame] = useState<Game | null>(null)
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(
-    () => (getBucketsSync() ? 'ready' : 'loading'),
+    'loading',
   )
   const [bootChars, setBootChars] = useState(0)
+  const memoryRef = useRef<HTMLDivElement | null>(null)
+  const sizeRef = useRef<BoardSize>({ cols: DEFAULT_COLS, rows: DEFAULT_ROWS })
 
   useEffect(() => {
-    if (getBucketsSync()) return
-
     let cancelled = false
     loadDictionary()
-      .then((loaded) => {
-        if (!cancelled) {
-          setGame(createGame(difficultyId, loaded))
-          setLoadState('ready')
-        }
+      .then(() => {
+        if (!cancelled) setLoadState('ready')
       })
       .catch(() => {
         if (!cancelled) setLoadState('error')
       })
-
     return () => {
       cancelled = true
     }
-  }, [difficultyId])
+  }, [])
+
+  const booted = bootChars >= BOOT_TEXT.length
 
   useEffect(() => {
     const step = Math.max(1, Math.ceil(BOOT_TEXT.length / 60))
@@ -67,6 +73,46 @@ export function HackView() {
     return () => window.clearInterval(id)
   }, [])
 
+  // Measures the memory area so the board fills the whole screen. Re-runs on
+  // any resize; the measured size feeds future games (not the current one, so
+  // resizing never resets an in-progress minigame).
+  useEffect(() => {
+    const element = memoryRef.current
+    if (!element) return
+
+    const measure = () => {
+      const probe = element.querySelector<HTMLSpanElement>('.terminal__probe')
+      if (!probe) return
+      const style = window.getComputedStyle(element)
+      const charWidth = probe.offsetWidth / PROBE_TEXT.length
+      const lineHeight =
+        parseFloat(style.lineHeight) || parseFloat(style.fontSize) || 16
+
+      const cols = Math.max(
+        MIN_COLS,
+        Math.floor(element.clientWidth / charWidth),
+      )
+      const rows = Math.max(MIN_ROWS, Math.floor(element.clientHeight / lineHeight))
+      sizeRef.current = { cols, rows }
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [booted])
+
+  // Creates/refreshes the board once the terminal is measured and the
+  // dictionary is ready. Keyed by boot+difficulty, so switching levels starts
+  // a fresh game while resizing keeps the current one running.
+  useEffect(() => {
+    if (!booted || loadState !== 'ready') return
+    const buckets = getBucketsSync()
+    if (!buckets) return
+    const { cols, rows } = sizeRef.current
+    setGame(createGame(difficultyId, buckets, cols, rows))
+  }, [booted, loadState, difficultyId])
+
   useEffect(() => {
     if (!game || game.phase !== 'accessing') return
     const id = window.setTimeout(() => {
@@ -79,8 +125,6 @@ export function HackView() {
     return () => window.clearTimeout(id)
   }, [game])
 
-  const booted = bootChars >= BOOT_TEXT.length
-
   const skipBoot = () => {
     if (booted) return
     setBootChars(BOOT_TEXT.length)
@@ -89,33 +133,25 @@ export function HackView() {
   const newGame = () => {
     playSfx(restartSfx)
     const buckets = getBucketsSync()
-    if (buckets) setGame(createGame(difficultyId, buckets))
+    if (!buckets) return
+    const { cols, rows } = sizeRef.current
+    setGame(createGame(difficultyId, buckets, cols, rows))
   }
 
   const retry = () => {
     setLoadState('loading')
     loadDictionary()
-      .then((loaded) => {
-        setGame(createGame(difficultyId, loaded))
-        setLoadState('ready')
-      })
-      .catch(() => {
-        setLoadState('error')
-      })
+      .then(() => setLoadState('ready'))
+      .catch(() => setLoadState('error'))
   }
 
   const handleDifficulty = (label: string) => {
     const next = DIFFICULTIES.find((difficulty) => difficulty.label === label)
     if (!next) return
     setDifficultyId(next.id)
-    const buckets = getBucketsSync()
-    if (buckets) {
-      setGame(createGame(next.id, buckets))
-      setLoadState('ready')
-    }
   }
 
-  const handleGuess = (slot: Slot) => {
+  const handleGuess = (slot: MemorySlot) => {
     if (!game || game.phase !== 'playing' || slot.wordIndex === undefined) return
     const next = applyGuess(game, slot.wordIndex)
     setGame(next)
@@ -124,61 +160,65 @@ export function HackView() {
     else playSfx(clickSfx)
   }
 
-  const handleDud = (slot: Slot) => {
+  const handleDud = (slot: MemorySlot) => {
     if (!game || game.phase !== 'playing') return
     setGame(applyDud(game, slot.id))
     playSfx(dudSfx)
   }
 
-  const renderSlot = (slot: Slot) => {
-    if (slot.kind === 'noise') {
-      return <span className="terminal__cell">{slot.text}</span>
-    }
-
-    if (slot.kind === 'dud') {
-      return (
-        <span className="terminal__cell">
-          {slot.prefix}
-          <button
-            type="button"
-            className="hack-word hack-word--dud"
-            onClick={() => handleDud(slot)}
-          >
-            {slot.text}
-          </button>
-          {slot.suffix}
-        </span>
-      )
-    }
-
-    if (game && isWordRemoved(game, slot)) {
-      return (
-        <span className="terminal__cell">
-          {slot.prefix}
-          {slot.text}
-          {slot.suffix}
-        </span>
-      )
-    }
-
-    const struck = game ? game.struck.has(slot.wordIndex as number) : false
-    return (
-      <span className="terminal__cell">
-        {slot.prefix}
-        <button
-          type="button"
-          className={
-            struck ? 'hack-word hack-word--struck' : 'hack-word'
+  const renderLine = (line: BoardLine) => (
+    <div key={`${line.column}-${line.row}`} className="terminal__line">
+      <span className="terminal__addr">{line.address}</span>
+      <span className="terminal__content">
+        {line.segments.map((segment, index) => {
+          if (segment.kind === 'noise') {
+            return <span key={index}>{segment.text}</span>
           }
-          disabled={struck}
-          onClick={() => handleGuess(slot)}
-        >
-          {slot.text}
-        </button>
-        {slot.suffix}
+
+          const slot = segment.slot as MemorySlot
+          if (slot.kind === 'dud') {
+            if (game && isDudUsed(game, slot)) {
+              return (
+                <span
+                  key={index}
+                  className="hack-word hack-word--dud hack-word--dud--used"
+                >
+                  {segment.text}
+                </span>
+              )
+            }
+            return (
+              <button
+                key={index}
+                type="button"
+                className="hack-word hack-word--dud"
+                onClick={() => handleDud(slot)}
+              >
+                {segment.text}
+              </button>
+            )
+          }
+
+          if (game && isWordRemoved(game, slot)) {
+            return <span key={index}>{segment.text}</span>
+          }
+
+          const struck = game ? game.struck.has(slot.wordIndex as number) : false
+          return (
+            <button
+              key={index}
+              type="button"
+              className={struck ? 'hack-word hack-word--struck' : 'hack-word'}
+              disabled={struck}
+              onClick={() => handleGuess(slot)}
+            >
+              {segment.text}
+            </button>
+          )
+        })}
       </span>
-    )
-  }
+    </div>
+  )
 
   if (loadState === 'loading') {
     return (
@@ -189,7 +229,7 @@ export function HackView() {
     )
   }
 
-  if (loadState === 'error' || game === null) {
+  if (loadState === 'error') {
     return (
       <div className="hack hack--status">
         <p className="hack__status-text">ERROR DE DICCIONARIO</p>
@@ -200,14 +240,14 @@ export function HackView() {
     )
   }
 
-  const remaining = MAX_ATTEMPTS - game.attemptsUsed
+  const remaining = game ? MAX_ATTEMPTS - game.attemptsUsed : MAX_ATTEMPTS
 
   return (
     <div className="hack">
       <div className="hack__top">
         <TabNav
           tabs={DIFFICULTY_LABELS}
-          activeTab={game.difficulty.label}
+          activeTab={game?.difficulty.label ?? DIFFICULTIES[0].label}
           onSelect={handleDifficulty}
           label="Dificultad"
           confirmSfx={submoduleChangeSfx}
@@ -247,24 +287,31 @@ export function HackView() {
                 </span>
               </div>
 
-              <div className="terminal__memory">
-                {game.lines.map((line) => (
-                  <div key={line.row} className="terminal__line">
-                    <span className="terminal__addr">{line.address}</span>
-                    <span className="terminal__col">{renderSlot(line.colA)}</span>
-                    <span className="terminal__col terminal__col--b">
-                      {renderSlot(line.colB)}
-                    </span>
-                  </div>
-                ))}
+              <div ref={memoryRef} className="terminal__memory">
+                <span className="terminal__probe" aria-hidden="true">
+                  {PROBE_TEXT}
+                </span>
+                {game &&
+                  [0, 1].map((column) => (
+                    <div
+                      key={column}
+                      className="terminal__column"
+                      data-column={column}
+                    >
+                      {game.lines
+                        .filter((line) => line.column === column)
+                        .map((line) => renderLine(line))}
+                    </div>
+                  ))}
               </div>
 
               <div className="terminal__log">
-                {game.log.map((line, index) => (
-                  <div key={index} className="terminal__log-line">
-                    {line}
-                  </div>
-                ))}
+                {game &&
+                  game.log.map((line, index) => (
+                    <div key={index} className="terminal__log-line">
+                      {line}
+                    </div>
+                  ))}
               </div>
 
               <div className="terminal__prompt">
@@ -274,7 +321,7 @@ export function HackView() {
             </>
           )}
 
-          {game.phase === 'success' && (
+          {game?.phase === 'success' && (
             <div className="terminal__overlay">
               <p className="terminal__overlay-line">
                 [ACCESO CONCEDIDO — CONTENIDO PENDIENTE]
@@ -285,7 +332,7 @@ export function HackView() {
             </div>
           )}
 
-          {game.phase === 'blocked' && (
+          {game?.phase === 'blocked' && (
             <div className="terminal__overlay">
               <p className="terminal__overlay-line">&gt;Attempt(s) Remaining: 0</p>
               <p className="terminal__overlay-line">&gt;TERMINAL LOCKED</p>

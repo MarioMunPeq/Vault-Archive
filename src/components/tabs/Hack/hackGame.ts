@@ -2,14 +2,26 @@ import type { Difficulty, DifficultyId } from './hackTypes'
 import type { WordBuckets } from './words'
 
 export const MAX_ATTEMPTS = 4
-export const GRID_ROWS = 11
+
+/** Safe lower bounds for the measured board so games always fit. */
+export const MIN_COLS = 48
+export const MIN_ROWS = 12
+
+/** Defaults used before the terminal is measured (or in unit-test scripts). */
+export const DEFAULT_COLS = 76
+export const DEFAULT_ROWS = 14
+
+/** "0x" + 6 hex digits + 1 separating space (per line, both columns). */
+export const ADDRESS_WIDTH = 9
+
+/** Separator (in characters) between the two memory columns. */
+export const COLUMN_GAP = 2
 
 const DUD_TYPES: readonly string[] = ['<>', '{}', '[]', '()']
 const DUD_COUNT = 3
 const MIN_WORDS = 8
 const MAX_WORDS = 10
-const MARGIN = 2 // noise cells framing each word / dud on each side
-const NOISE_BASE = '.,;:!?'
+const NOISE_BASE = ".,;:!?'`-"
 const NOISE_EXTRA: Record<DifficultyId, string> = {
   novato: '()',
   avanzado: '()[]',
@@ -26,7 +38,7 @@ export const DIFFICULTIES: readonly Difficulty[] = [
     minLen: 4,
     maxLen: 5,
     symbols: NOISE_EXTRA.novato,
-    spaceChance: 0.22,
+    letterChance: 0.1,
   },
   {
     id: 'avanzado',
@@ -34,7 +46,7 @@ export const DIFFICULTIES: readonly Difficulty[] = [
     minLen: 6,
     maxLen: 7,
     symbols: NOISE_EXTRA.avanzado,
-    spaceChance: 0.14,
+    letterChance: 0.09,
   },
   {
     id: 'experto',
@@ -42,7 +54,7 @@ export const DIFFICULTIES: readonly Difficulty[] = [
     minLen: 8,
     maxLen: 9,
     symbols: NOISE_EXTRA.experto,
-    spaceChance: 0.08,
+    letterChance: 0.08,
   },
   {
     id: 'maestro',
@@ -50,36 +62,53 @@ export const DIFFICULTIES: readonly Difficulty[] = [
     minLen: 10,
     maxLen: 12,
     symbols: NOISE_EXTRA.maestro,
-    spaceChance: 0.05,
+    letterChance: 0.07,
   },
 ]
 
-export type SlotKind = 'word' | 'dud' | 'noise'
+export type MemorySlotKind = 'word' | 'dud'
 
-export interface Slot {
+/** A clickable run of characters inside a board line. */
+export interface MemorySlot {
   id: string
-  col: 0 | 1
-  row: number
-  kind: SlotKind
+  lineIndex: number
+  /** Column in the line's content where the token starts. */
+  col: number
+  /** Token length in characters. */
+  length: number
+  kind: MemorySlotKind
   /** Index into Game.candidates, set on `word` slots. */
   wordIndex?: number
   /** The pair of characters, set on `dud` slots. */
   dudType?: string
-  prefix: string
+}
+
+export interface BoardSegment {
+  kind: MemorySlotKind | 'noise'
+  /** Column in the line's content where the segment starts. */
+  start: number
   text: string
-  suffix: string
+  slot?: MemorySlot
 }
 
 export interface BoardLine {
+  /** Vertical index inside its own column. */
   row: number
+  /** 0 = left column, 1 = right column. */
+  column: 0 | 1
   address: string
-  colA: Slot
-  colB: Slot
+  content: string
+  segments: readonly BoardSegment[]
 }
 
 export interface Game {
   difficulty: Difficulty
   wordLen: number
+  /** Total measure characters across both columns (addresses + gap included). */
+  cols: number
+  /** Characters of text per column line, addresses excluded. */
+  contentWidth: number
+  rows: number
   candidates: readonly string[]
   correctIndex: number
   lines: readonly BoardLine[]
@@ -88,6 +117,8 @@ export interface Game {
   struck: ReadonlySet<number>
   /** Candidate indexes erased from the board by a dud. */
   removed: ReadonlySet<number>
+  /** Ids of dud pairs that have already been activated (kept visible but dead). */
+  usedDuds: ReadonlySet<string>
   /** Console feedback lines (">[WORD]" / ">Entry Denied" / ">X/Y correct"). */
   log: readonly string[]
   phase: 'playing' | 'accessing' | 'success' | 'blocked'
@@ -116,10 +147,7 @@ function makeNoise(length: number, difficulty: Difficulty): string {
   const symbols = NOISE_BASE + difficulty.symbols
   let out = ''
   for (let i = 0; i < length; i++) {
-    const roll = Math.random()
-    if (roll < difficulty.spaceChance) {
-      out += ' '
-    } else if (roll < difficulty.spaceChance + 0.25) {
+    if (Math.random() < difficulty.letterChance) {
       out += LETTERS[randInt(0, LETTERS.length - 1)]
     } else {
       out += symbols[randInt(0, symbols.length - 1)]
@@ -130,8 +158,8 @@ function makeNoise(length: number, difficulty: Difficulty): string {
 
 function makeAddress(): string {
   let hex = ''
-  for (let i = 0; i < 4; i++) hex += HEX[randInt(0, HEX.length - 1)]
-  return `0x${hex}`
+  for (let i = 0; i < 6; i++) hex += HEX[randInt(0, HEX.length - 1)]
+  return `0x${hex} `
 }
 
 /** How many character positions match exactly, the game's core hint. */
@@ -143,77 +171,116 @@ export function likeness(guess: string, correct: string): number {
   return count
 }
 
-interface Cell {
-  col: 0 | 1
-  row: number
+interface PlannedToken {
+  lineIndex: number
+  col: number
+  text: string
+  kind: MemorySlotKind
+  wordIndex?: number
+  dudType?: string
 }
 
-function buildLines(
-  wordLen: number,
+/** Characters of text per column line (addresses and gap excluded). */
+function contentWidthFor(cols: number): number {
+  return Math.max(13, Math.floor((cols - 2 * ADDRESS_WIDTH - COLUMN_GAP) / 2))
+}
+
+/**
+ * Builds the memory board as two independent columns side by side. Every row
+ * renders two lines (left / right), each with its own hex address. Candidates
+ * and duds are spread over the two columns, one token per line at most.
+ */
+function buildBoard(
   difficulty: Difficulty,
   candidates: readonly string[],
+  cols: number,
+  rows: number,
 ): BoardLine[] {
-  const cells: Cell[] = []
-  for (let row = 0; row < GRID_ROWS; row++) {
-    for (const col of [0, 1] as const) cells.push({ col, row })
-  }
+  const contentWidth = contentWidthFor(cols)
+  const totalLines = rows * 2
 
-  const slotWidth = wordLen + MARGIN * 2
-  const byCell = new Map<string, Slot>()
-  const key = (cell: Cell) => `${cell.col}:${cell.row}`
-  let cellIndex = 0
-
-  for (let i = 0; i < candidates.length; i++) {
-    const cell = cells[cellIndex++]
-    byCell.set(key(cell), {
-      id: `w${cell.col}-${cell.row}`,
-      col: cell.col,
-      row: cell.row,
-      kind: 'word',
-      wordIndex: i,
-      prefix: makeNoise(MARGIN, difficulty),
-      text: candidates[i],
-      suffix: makeNoise(MARGIN, difficulty),
-    })
-  }
+  const planned: PlannedToken[] = candidates.map((text, wordIndex) => ({
+    lineIndex: -1,
+    col: 0,
+    text,
+    kind: 'word',
+    wordIndex,
+  }))
 
   for (let i = 0; i < DUD_COUNT; i++) {
-    const cell = cells[cellIndex++]
     const dudType = pick(DUD_TYPES)
-    byCell.set(key(cell), {
-      id: `d${cell.col}-${cell.row}`,
-      col: cell.col,
-      row: cell.row,
+    const filler = makeNoise(randInt(1, 3), { ...difficulty, letterChance: 0 })
+    planned.push({
+      lineIndex: -1,
+      col: 0,
+      text: `${dudType[0]}${filler}${dudType[1]}`,
       kind: 'dud',
       dudType,
-      prefix: makeNoise(MARGIN, difficulty),
-      text: dudType,
-      suffix: makeNoise(MARGIN, difficulty),
     })
   }
 
-  for (; cellIndex < cells.length; cellIndex++) {
-    const cell = cells[cellIndex]
-    byCell.set(key(cell), {
-      id: `n${cell.col}-${cell.row}`,
-      col: cell.col,
-      row: cell.row,
-      kind: 'noise',
-      prefix: '',
-      text: makeNoise(slotWidth, difficulty),
-      suffix: '',
-    })
-  }
+  const linePool = shuffle(
+    Array.from({ length: totalLines }, (_, index) => index),
+  ).slice(0, planned.length)
+
+  planned.forEach((token, index) => {
+    token.lineIndex = linePool[index]
+    token.col = randInt(1, Math.max(1, contentWidth - token.text.length))
+  })
 
   const lines: BoardLine[] = []
-  for (let row = 0; row < GRID_ROWS; row++) {
+  for (let lineIndex = 0; lineIndex < totalLines; lineIndex++) {
+    const column: 0 | 1 = lineIndex < rows ? 0 : 1
+    const row = lineIndex % rows
+    let content = makeNoise(contentWidth, difficulty)
+    const segments: BoardSegment[] = []
+
+    const token = planned.find((item) => item.lineIndex === lineIndex)
+    if (token) {
+      const length = token.text.length
+      const col = Math.min(Math.max(1, token.col), contentWidth - length)
+      content =
+        content.slice(0, col) + token.text + content.slice(col + length)
+
+      const slot: MemorySlot = {
+        id: `${token.kind === 'word' ? 'w' : 'd'}${lineIndex}`,
+        lineIndex,
+        col,
+        length,
+        kind: token.kind,
+        wordIndex: token.wordIndex,
+        dudType: token.dudType,
+      }
+
+      if (col > 0) {
+        segments.push({ kind: 'noise', start: 0, text: content.slice(0, col) })
+      }
+      segments.push({
+        kind: token.kind,
+        start: col,
+        text: content.slice(col, col + length),
+        slot,
+      })
+      if (col + length < contentWidth) {
+        segments.push({
+          kind: 'noise',
+          start: col + length,
+          text: content.slice(col + length),
+        })
+      }
+    } else {
+      segments.push({ kind: 'noise', start: 0, text: content })
+    }
+
     lines.push({
       row,
+      column,
       address: makeAddress(),
-      colA: byCell.get(`0:${row}`)!,
-      colB: byCell.get(`1:${row}`)!,
+      content,
+      segments,
     })
   }
+
   return lines
 }
 
@@ -221,6 +288,8 @@ function buildLines(
 export function createGame(
   difficultyId: DifficultyId,
   buckets: WordBuckets,
+  cols = DEFAULT_COLS,
+  rows = DEFAULT_ROWS,
 ): Game {
   const difficulty =
     DIFFICULTIES.find((item) => item.id === difficultyId) ?? DIFFICULTIES[0]
@@ -235,57 +304,68 @@ export function createGame(
   const count = pool.length >= MAX_WORDS ? randInt(MIN_WORDS, MAX_WORDS) : pool.length
   const candidates = shuffle(pool).slice(0, count)
   const correctIndex = randInt(0, candidates.length - 1)
+  const safeCols = Math.max(cols, MIN_COLS)
+  const safeRows = Math.max(rows, MIN_ROWS)
 
   return {
     difficulty,
     wordLen,
+    cols: safeCols,
+    rows: safeRows,
+    contentWidth: contentWidthFor(safeCols),
     candidates,
     correctIndex,
-    lines: buildLines(wordLen, difficulty, candidates),
+    lines: buildBoard(difficulty, candidates, safeCols, safeRows),
     attemptsUsed: 0,
     struck: new Set(),
     removed: new Set(),
+    usedDuds: new Set(),
     log: [],
     phase: 'playing',
   }
 }
 
-/** Replaces a slot on the board with pure noise (used by duds). */
-function replaceWithNoise(
+/**
+ * Turns a slot's characters into fresh noise and rebuilds the line's
+ * segments (merging the replaced slice with whatever noise surrounds it).
+ */
+function replaceSlotNoise(
   lines: readonly BoardLine[],
   slotId: string,
   difficulty: Difficulty,
-  wordLen: number,
 ): BoardLine[] {
-  const slotWidth = wordLen + MARGIN * 2
   return lines.map((line) => {
-    if (line.colA.id === slotId) {
-      return {
-        ...line,
-        colA: {
-          ...line.colA,
-          kind: 'noise' as const,
-          dudType: undefined,
-          prefix: '',
-          text: makeNoise(slotWidth, difficulty),
-          suffix: '',
-        },
-      }
-    }
-    if (line.colB.id === slotId) {
-      return {
-        ...line,
-        colB: {
-          ...line.colB,
-          kind: 'noise' as const,
-          dudType: undefined,
-          prefix: '',
-          text: makeNoise(slotWidth, difficulty),
-          suffix: '',
-        },
-      }
-    }
-    return line
+    const index = line.segments.findIndex(
+      (segment) => segment.slot?.id === slotId,
+    )
+    if (index === -1) return line
+
+    const slot = line.segments[index].slot as MemorySlot
+    const replacement = makeNoise(slot.length, difficulty)
+    const content =
+      line.content.slice(0, slot.col) +
+      replacement +
+      line.content.slice(slot.col + slot.length)
+
+    const prev = line.segments[index - 1]
+    const next = line.segments[index + 1]
+    const beforeStart =
+      prev && prev.kind === 'noise' ? prev.start : slot.col
+    const afterEnd =
+      next && next.kind === 'noise'
+        ? next.start + next.text.length
+        : slot.col + slot.length
+    const merged = content.slice(beforeStart, afterEnd)
+
+    const segments = line.segments.filter((segment) => (
+      segment !== line.segments[index] &&
+      segment !== prev &&
+      segment !== next
+    ))
+    segments.push({ kind: 'noise', start: beforeStart, text: merged })
+    segments.sort((a, b) => a.start - b.start)
+
+    return { ...line, content, segments }
   })
 }
 
@@ -335,46 +415,54 @@ export function applyGuess(game: Game, wordIndex: number): Game {
 }
 
 /**
- * Triggers a dud pair. Two random effects, picked each time it is used:
- * either one remaining wrong word vanishes (replaced with noise) or the
- * used attempts are reset to zero. Never consumes an attempt; the pair is
- * consumed on use (replaced with noise).
+ * Triggers a dud pair. One of two effects is picked at call time: either one
+ * remaining wrong word turns back into noise or all used attempts are restored
+ * (the attempts bar and the remaining counter update instantly). Never costs
+ * an attempt. The pair is then consumed: it stays visible on the board but is
+ * no longer hoverable/clickable, so it can't be reused.
  */
 export function applyDud(game: Game, slotId: string): Game {
   if (game.phase !== 'playing') return game
+  if (game.usedDuds.has(slotId)) return game
 
-  let lines = replaceWithNoise(game.lines, slotId, game.difficulty, game.wordLen)
+  const usedDuds = new Set(game.usedDuds).add(slotId)
+  let lines = game.lines
+  let removed = new Set(game.removed)
+  let attemptsUsed = game.attemptsUsed
 
   if (Math.random() < 0.5) {
-    // Remove a wrong, still-present word from the board.
-    const removable = lines.flatMap((line) => [line.colA, line.colB]).find(
-      (slot) =>
-        slot.kind === 'word' &&
-        slot.wordIndex !== undefined &&
-        slot.wordIndex !== game.correctIndex &&
-        !game.struck.has(slot.wordIndex) &&
-        !game.removed.has(slot.wordIndex),
-    )
+    const removable = lines
+      .flatMap((line) =>
+        line.segments
+          .map((segment) => segment.slot)
+          .filter((slot): slot is MemorySlot => slot?.kind === 'word'),
+      )
+      .find(
+        (slot) =>
+          slot.wordIndex !== undefined &&
+          slot.wordIndex !== game.correctIndex &&
+          !game.struck.has(slot.wordIndex) &&
+          !game.removed.has(slot.wordIndex),
+      )
 
     if (removable) {
-      lines = replaceWithNoise(lines, removable.id, game.difficulty, game.wordLen)
-      return {
-        ...game,
-        lines,
-        removed: new Set(game.removed).add(removable.wordIndex as number),
-      }
+      lines = replaceSlotNoise(lines, removable.id, game.difficulty)
+      removed = new Set(game.removed).add(removable.wordIndex as number)
+    } else {
+      // No wrong word left to erase this time: fall back to restoring attempts.
+      attemptsUsed = 0
     }
-
-    return { ...game, lines }
+  } else {
+    attemptsUsed = 0
   }
 
-  return {
-    ...game,
-    lines,
-    attemptsUsed: 0,
-  }
+  return { ...game, lines, usedDuds, removed, attemptsUsed }
 }
 
-export function isWordRemoved(game: Game, slot: Slot): boolean {
+export function isDudUsed(game: Game, slot: MemorySlot): boolean {
+  return game.usedDuds.has(slot.id)
+}
+
+export function isWordRemoved(game: Game, slot: MemorySlot): boolean {
   return slot.wordIndex !== undefined && game.removed.has(slot.wordIndex)
 }

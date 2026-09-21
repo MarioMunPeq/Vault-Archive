@@ -30,8 +30,8 @@
 }
 
 /* Terminal de hackeo. Monofonto (la fuente del Pip-Boy) es monospace
-   (todos los glifos comparten la misma anchura), así que las dos columnas de
-   memoria y las direcciones hex quedan alineadas, como en el terminal real. */
+   (todos los glifos comparten la misma anchura), así que las líneas de
+   memoria y las direcciones hex quedan alineadas como en el terminal real. */
 .terminal {
   position: relative;
   flex: 1 1 auto;
@@ -51,6 +51,7 @@
 }
 
 .terminal__boot {
+  flex: 0 0 auto;
   white-space: pre-wrap;
   cursor: pointer;
   letter-spacing: 0.06em;
@@ -74,6 +75,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   color: var(--pipboy-color);
+  white-space: nowrap;
 }
 
 .terminal__attempts-blocks {
@@ -93,9 +95,39 @@
   text-shadow: 0 0 6px var(--pipboy-color-glow);
 }
 
+/* Memoria: ocupa todo el espacio sobrante y rellena el terminal con ruido
+   compacto, sin letter-spacing para que las columnas coincidan exactamente. */
 .terminal__memory {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
   margin-top: 3px;
+  letter-spacing: 0;
+  position: relative;
+  display: flex;
+}
+
+/* Cada mitad de la memoria va en su propia columna, lado a lado. */
+.terminal__column {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  white-space: pre;
+}
+
+/* Separador vertical entre la columna izquierda y la derecha. */
+.terminal__column + .terminal__column {
+  border-left: 1px solid var(--pipboy-color-deep);
+  padding-left: 1ch;
+  margin-left: 1ch;
+}
+
+.terminal__probe {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
 }
 
 .terminal__line {
@@ -104,22 +136,14 @@
 
 .terminal__addr {
   display: inline-block;
-  min-width: 7ch;
+  width: 8ch;
+  padding-right: 1ch;
   color: var(--pipboy-color-faint);
   text-shadow: none;
 }
 
-.terminal__col {
-  display: inline-block;
-}
-
-.terminal__col--b {
-  margin-left: 3ch;
-}
-
-.terminal__cell {
+.terminal__content {
   white-space: pre;
-  letter-spacing: 0.02em;
 }
 
 .hack-word {
@@ -143,6 +167,16 @@
   cursor: default;
 }
 
+/* Dud ya consumido (isDudUsed): texto atenuado, sin efecto hover y sin
+   cursor de interacción. No es un botón, solo informa de su consumo. */
+.hack-word--dud--used,
+.hack-word--dud--used:hover {
+  color: var(--pipboy-color-faint);
+  text-shadow: none;
+  background: none;
+  cursor: default;
+}
+
 .hack-word--struck {
   color: var(--pipboy-color-faint);
   text-shadow: none;
@@ -151,10 +185,10 @@
 }
 
 .terminal__log {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  margin-top: 8px;
+  flex: 0 0 auto;
+  max-height: 4.8em;
+  overflow-y: auto;
+  margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed var(--pipboy-color-deep);
   font-size: 0.76rem;

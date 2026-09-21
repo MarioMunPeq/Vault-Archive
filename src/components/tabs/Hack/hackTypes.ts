@@ -6,8 +6,8 @@ export interface Difficulty {
   /** Range of word lengths (in letters) for this level. */
   minLen: number
   maxLen: number
-  /** Extra symbols added to the base noise set (. , ; : ! ?). */
+  /** Extra symbols added to the base noise set (. , ; : ! ? ' - `). */
   symbols: string
-  /** Probability (0..1) that a noise cell is a blank space. */
-  spaceChance: number
+  /** Probability (0..1) that a noise cell is a random letter. */
+  letterChance: number
 }
