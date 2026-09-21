@@ -2,7 +2,7 @@ export type DataSectionId =
   | 'ABOUT'
   | 'EDUCATION'
   | 'EXPERIENCE'
-  | 'SKILLS'
+  | 'PROJECTS'
   | 'CONTACT'
 
 export interface DataEntry {
@@ -156,90 +156,6 @@ const EXPERIENCE_ENTRIES: readonly DataEntry[] = [
   },
 ]
 
-const SKILL_ENTRIES: readonly DataEntry[] = [
-  {
-    id: 'sk-java',
-    name: 'SK_JAVA.MOD',
-    level: 78,
-    lines: [
-      'MÓDULO ............: JAVA',
-      'NIVEL .............: AVANZADO - 78%',
-    ],
-  },
-  {
-    id: 'sk-python',
-    name: 'SK_PYTHON.MOD',
-    level: 70,
-    lines: [
-      'MÓDULO ............: PYTHON',
-      'NIVEL .............: AVANZADO - 70%',
-    ],
-  },
-  {
-    id: 'sk-kotlin',
-    name: 'SK_KOTLIN.MOD',
-    level: 55,
-    lines: [
-      'MÓDULO ............: KOTLIN',
-      'NIVEL .............: COMPETENTE - 55%',
-    ],
-  },
-  {
-    id: 'sk-csharp',
-    name: 'SK_CSHARP.MOD',
-    level: 50,
-    lines: [
-      'MÓDULO ............: C#',
-      'NIVEL .............: COMPETENTE - 50%',
-    ],
-  },
-  {
-    id: 'sk-javascript',
-    name: 'SK_JS.MOD',
-    level: 72,
-    lines: [
-      'MÓDULO ............: JAVASCRIPT',
-      'NIVEL .............: AVANZADO - 72%',
-    ],
-  },
-  {
-    id: 'sk-typescript',
-    name: 'SK_TS.MOD',
-    level: 64,
-    lines: [
-      'MÓDULO ............: TYPESCRIPT',
-      'NIVEL .............: AVANZADO - 64%',
-    ],
-  },
-  {
-    id: 'sk-react',
-    name: 'SK_REACT.MOD',
-    level: 66,
-    lines: [
-      'MÓDULO ............: REACT',
-      'NIVEL .............: AVANZADO - 66%',
-    ],
-  },
-  {
-    id: 'sk-sql',
-    name: 'SK_SQL.MOD',
-    level: 68,
-    lines: [
-      'MÓDULO ............: SQL',
-      'NIVEL .............: AVANZADO - 68%',
-    ],
-  },
-  {
-    id: 'sk-git',
-    name: 'SK_GIT.MOD',
-    level: 74,
-    lines: [
-      'MÓDULO ............: GIT',
-      'NIVEL .............: AVANZADO - 74%',
-    ],
-  },
-]
-
 const CONTACT_ENTRIES: readonly DataEntry[] = [
   {
     id: 'ct-email',
@@ -279,6 +195,63 @@ const CONTACT_ENTRIES: readonly DataEntry[] = [
   },
 ]
 
+const PROJECT_ENTRIES: readonly DataEntry[] = [
+  {
+    id: 'proj-vault',
+    name: 'PROJ_VAULT.MOD',
+    lines: [
+      'NOMBRE ..........: VAULT ARCHIVE',
+      'TIPO ............: INTERFAZ PIP-BOY / PORTFOLIO',
+      'ESTADO ..........: EN DESARROLLO ACTIVO',
+      '',
+      'Recreación funcional de la interfaz Pip-Boy 3000',
+      'como portfolio técnico interactivo. Incluye:',
+      '- Navegación por tabs/subtabs estilo Fallout',
+      '- Mapa con marcadores y indicadores off-screen',
+      '- Terminal de hackeo con diccionario dinámico',
+      '- Radio con visualizador de onda y ecualizador',
+      '- Sistema CRT con scanlines y efectos de boot',
+      '',
+      'STACK: React 19, TypeScript, Vite, Mapbox GL',
+      'CSS custom properties, animaciones steps()',
+    ],
+  },
+  {
+    id: 'proj-dnd',
+    name: 'PROJ_DND_TOOLS.MOD',
+    lines: [
+      'NOMBRE ..........: D&D SESSION TOOLS',
+      'TIPO ............: HERRAMIENTAS DE MESA',
+      'ESTADO ..........: PROTOTIPO',
+      '',
+      'Conjunto de utilidades para Director de Juego:',
+      '- Generador de encuentros balanceados',
+      '- Calculadora de experiencia y tesoro',
+      '- Seguimiento de iniciativa y condiciones',
+      '- Integración con SRD 5.1',
+      '',
+      'STACK: TypeScript, Node.js, CLI',
+    ],
+  },
+  {
+    id: 'proj-ai',
+    name: 'PROJ_IA_EXPERIMENTS.MOD',
+    lines: [
+      'NOMBRE ..........: IA EXPERIMENTS',
+      'TIPO ............: INVESTIGACIÓN / PROTOTIPOS',
+      'ESTADO ..........: EXPERIMENTAL',
+      '',
+      'Experimentos locales con modelos LLM:',
+      '- RAG sobre documentación técnica privada',
+      '- Agentes para refactorización asistida',
+      '- Generación de tests a partir de código',
+      '- Evaluación de modelos cuantizados (GGUF)',
+      '',
+      'STACK: Python, Ollama, LangChain, llama.cpp',
+    ],
+  },
+]
+
 export const DATA_SECTIONS: readonly DataSectionInfo[] = [
   {
     id: 'ABOUT',
@@ -299,10 +272,10 @@ export const DATA_SECTIONS: readonly DataSectionInfo[] = [
     entries: EXPERIENCE_ENTRIES,
   },
   {
-    id: 'SKILLS',
-    label: 'SKILLS',
-    path: 'SYS:\\VAULT\\REGISTROS\\SKILLS\\',
-    entries: SKILL_ENTRIES,
+    id: 'PROJECTS',
+    label: 'PROJECTS',
+    path: 'SYS:\\VAULT\\REGISTROS\\PROJECTS\\',
+    entries: PROJECT_ENTRIES,
   },
   {
     id: 'CONTACT',

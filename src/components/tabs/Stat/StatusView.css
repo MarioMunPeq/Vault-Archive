@@ -4,54 +4,111 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 4px 0;
+  padding: 8px 12px;
+  gap: 16px;
+  overflow-y: auto;
 }
 
-/* Compositing canvas, in native artwork pixels: body 75x109 + the head's 48px
-   overhang, i.e. 75x157. The body sits at y=48 and everything else is
-   positioned from the anchors computed in StatusView.tsx (neck socket per body
-   frame / head-1 neck tip). No pixel values are hand-tuned here. */
-.status__character {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  max-width: 100%;
-  align-self: center;
-  width: auto;
-  aspect-ratio: 75 / 157;
-}
-
-/* Body: 109/157 tall, occupying the lower part of the canvas (48/157 is where
-   the body top sits, i.e. below the head overhang). */
-.status-layer--body {
-  position: absolute;
-  top: 30.57%;
-  left: 0;
+/* ---------- S.P.E.C.I.A.L. section ---------- */
+.status__special {
   width: 100%;
-  height: 69.43%;
-  display: block;
-  object-fit: contain;
+  max-width: 520px;
+  flex-shrink: 0;
 }
 
-/* Head: left/top/width/height come from measured neck anchors (see
-   StatusView.tsx). It must not be positioned by its left edge or face centroid
-   because head/1's canvas width is not stable relative to the body. */
-.status-layer--head {
-  position: absolute;
-  left: var(--status-head-left);
-  top: var(--status-head-top);
-  width: var(--status-head-width);
-  height: var(--status-head-height);
-  display: block;
-  object-fit: contain;
+.status__special-title {
+  margin: 0 0 12px;
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  color: var(--pipboy-color-faint);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Special grid from SpecialView.css, adapted */
+.special-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.2vh, 26px);
+  padding: 0 clamp(14px, 4vw, 48px);
+}
+
+.special-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(24px, 7vw, 96px);
+}
+
+.special-row--1 {
+  transform: translateX(-8px);
+}
+
+.special-row--2 {
+  transform: translateX(5px);
+}
+
+.special-row--3 {
+  transform: translateX(-3px);
+}
+
+.special-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.special-cell:hover,
+.special-cell:focus-visible {
+  border-color: var(--pipboy-color-glow);
+  box-shadow: inset 0 0 8px var(--pipboy-color-deep);
+  outline: none;
+}
+
+.special-cell__sigla {
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
+  color: var(--pipboy-color-faint);
+}
+
+.special-cell__icon {
+  width: clamp(72px, calc((100vh - 400px) / 3), 164px);
+  height: clamp(72px, calc((100vh - 400px) / 3), 164px);
+  filter: drop-shadow(0 0 5px var(--pipboy-color-deep));
+}
+
+.special-cell__value {
+  font-size: 1.7rem;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
+}
+
+/* ---------- Identity / Conditions section ---------- */
+.status__identity {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.status__character {
+  width: 100%;
 }
 
 .status__conditions {
   display: flex;
   gap: 30px;
   flex-shrink: 0;
+  justify-content: center;
 }
 
 .status-condition {
@@ -83,19 +140,52 @@
 }
 
 .status__name {
-  margin-top: 4px;
+  margin: 0;
   font-size: 1.05rem;
   letter-spacing: 0.26em;
   color: var(--pipboy-color);
   text-shadow: 0 0 6px var(--pipboy-color-glow);
-  flex-shrink: 0;
 }
 
-/* Role shown diegetically, like one more terminal data row */
 .status__class {
-  margin-top: -2px;
+  margin: -4px 0 0;
   font-size: 0.7rem;
   letter-spacing: 0.18em;
   color: var(--pipboy-color-faint);
+}
+
+/* ---------- Footer stats ---------- */
+.status__footer {
+  width: 100%;
+  max-width: 520px;
   flex-shrink: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--pipboy-color-deep);
+}
+
+.status__stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.status__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.status__stat-label {
+  font-size: 0.56rem;
+  letter-spacing: 0.24em;
+  color: var(--pipboy-color-faint);
+  text-transform: uppercase;
+}
+
+.status__stat-value {
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 6px var(--pipboy-color-glow);
 }

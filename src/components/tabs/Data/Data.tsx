@@ -6,13 +6,13 @@ import { DATA_SECTIONS } from './dataSections'
 import type { DataEntry } from './dataSections'
 import './Data.css'
 
-export type DataSubTab = 'ABOUT' | 'EDUCATION' | 'EXPERIENCE' | 'SKILLS' | 'CONTACT'
+export type DataSubTab = 'ABOUT' | 'EDUCATION' | 'EXPERIENCE' | 'PROJECTS' | 'CONTACT'
 
 const SUB_TABS: readonly DataSubTab[] = [
   'ABOUT',
   'EDUCATION',
   'EXPERIENCE',
-  'SKILLS',
+  'PROJECTS',
   'CONTACT',
 ]
 
