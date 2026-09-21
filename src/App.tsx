@@ -89,7 +89,7 @@ function App() {
                   </div>
                 )}
               </div>
-              <StatusBar />
+              {activeTab !== 'MAP' && <StatusBar />}
             </div>
           )}
         </Screen>
