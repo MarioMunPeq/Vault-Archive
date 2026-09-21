@@ -1,110 +1,30 @@
-import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent, CSSProperties } from 'react'
-import { playSfx } from '../../../utils/sfx'
-import clickSfx from '../../../assets/sfx/mechanical-click.wav'
-import tuneSfx from '../../../assets/sfx/electric-hum.wav'
-import { RADIO_STATIONS, radioSession } from './radioStations'
+import type { CSSProperties } from 'react'
+import { RADIO_STATIONS } from './radioStations'
+import { useRadio } from './radioContext'
 import { RadioScope } from './RadioScope'
 import './Radio.css'
 
 export function Radio() {
-  const [stationIndex, setStationIndex] = useState(radioSession.stationIndex)
-  const [trackIndex, setTrackIndex] = useState(0)
-  const [volume, setVolume] = useState(radioSession.volume)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [tuning, setTuning] = useState(false)
-  const [scanFrequency, setScanFrequency] = useState(88)
+  const {
+    stationIndex,
+    volume,
+    radioOn,
+    isPlaying,
+    currentTime,
+    duration,
+    tuning,
+    scanFrequency,
+    frequency,
+    trackName,
+    audioRef,
+    changeStation,
+    changeTrack,
+    togglePower,
+    seek,
+    changeVolume,
+  } = useRadio()
 
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const tuneTimerRef = useRef<number | null>(null)
-
-  const station =
-    RADIO_STATIONS[stationIndex] ?? RADIO_STATIONS[0]
-  const tracks = station.tracks
-  const track = tracks[trackIndex] ?? undefined
-
-  useEffect(() => {
-    return () => {
-      if (tuneTimerRef.current !== null) {
-        window.clearTimeout(tuneTimerRef.current)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio || !track) return
-    audio.volume = radioSession.volume / 100
-    audio
-      .play()
-      .then(() => setIsPlaying(true))
-      .catch(() => setIsPlaying(false))
-    return () => {
-      audio.pause()
-    }
-  }, [track])
-
-  useEffect(() => {
-    if (!tuning) return
-    const id = window.setInterval(() => {
-      setScanFrequency((value) => (value >= 108 ? 88 : value + 0.25))
-    }, 40)
-    return () => window.clearInterval(id)
-  }, [tuning])
-
-  const changeStation = (target: number) => {
-    if (tuning || target === stationIndex) return
-    audioRef.current?.pause()
-    playSfx(clickSfx)
-    setTuning(true)
-    playSfx(tuneSfx)
-    tuneTimerRef.current = window.setTimeout(() => {
-      radioSession.stationIndex = target
-      setStationIndex(target)
-      setTrackIndex(0)
-      setCurrentTime(0)
-      setDuration(0)
-      setTuning(false)
-    }, 800)
-  }
-
-  const changeTrack = (direction: -1 | 1) => {
-    const count = tracks.length
-    if (count === 0) return
-    playSfx(clickSfx)
-    setTrackIndex((index) => (index + direction + count) % count)
-    setCurrentTime(0)
-  }
-
-  const togglePlay = () => {
-    const audio = audioRef.current
-    if (!audio || !track) return
-    playSfx(clickSfx)
-    if (isPlaying) {
-      audio.pause()
-    } else {
-      audio.play().catch(() => {})
-    }
-  }
-
-  const seek = (seconds: number) => {
-    const audio = audioRef.current
-    if (!audio || !Number.isFinite(seconds)) return
-    audio.currentTime = seconds
-    setCurrentTime(seconds)
-  }
-
-  const changeVolume = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.target.value)
-    radioSession.volume = value
-    setVolume(value)
-    const audio = audioRef.current
-    if (audio) audio.volume = value / 100
-  }
-
-  const showFrequency = tuning ? scanFrequency.toFixed(1) : station.frequency
+  const showFrequency = tuning ? scanFrequency.toFixed(1) : frequency
 
   return (
     <div className="radio">
@@ -176,14 +96,14 @@ export function Radio() {
 
       <section className="radio__display">
         <div className="radio__stage">
-          {track ? (
+          {trackName ? (
             <>
               <div className="radio__now">
                 <span className="radio__now-name">
                   <span className="radio__track-icon" aria-hidden="true">
                     {isPlaying ? '♪' : '…'}
                   </span>
-                  {track.name}
+                  {trackName}
                 </span>
                 <span className="radio__now-times">
                   {formatTime(currentTime)} / {formatTime(duration)}
@@ -227,10 +147,11 @@ export function Radio() {
             <button
               type="button"
               className="radio__transport-btn radio__transport-btn--play"
-              onClick={togglePlay}
-              aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
+              onClick={togglePower}
+              aria-pressed={radioOn}
+              aria-label={radioOn ? 'Apagar la radio' : 'Encender la radio'}
             >
-              {isPlaying ? '││' : '▶'}
+              {radioOn ? 'ON' : 'OFF'}
             </button>
             <button
               type="button"
@@ -251,7 +172,7 @@ export function Radio() {
               max={100}
               step={1}
               value={volume}
-              onChange={changeVolume}
+              onChange={(event) => changeVolume(Number(event.target.value))}
               aria-label="Volumen"
             />
             <span className="radio__volume-value">{volume}%</span>
@@ -263,22 +184,6 @@ export function Radio() {
             </div>
           )}
         </div>
-
-        <audio
-          ref={audioRef}
-          src={track?.url}
-          preload="auto"
-          onTimeUpdate={(event) =>
-            setCurrentTime(event.currentTarget.currentTime)
-          }
-          onLoadedMetadata={(event) =>
-            setDuration(event.currentTarget.duration)
-          }
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => changeTrack(1)}
-          onError={() => setIsPlaying(false)}
-        />
       </section>
     </div>
   )

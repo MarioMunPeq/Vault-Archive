@@ -1,19 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 
+export type FrameSequenceMode = 'loop' | 'pingpong'
+
 export interface FrameSequenceOptions {
   intervalMs: number
   loop?: boolean
+  mode?: FrameSequenceMode
   durationMs?: number
   onComplete?: () => void
 }
 
 export function useFrameSequence(
   frameCount: number,
-  { intervalMs, loop = false, durationMs, onComplete }: FrameSequenceOptions,
+  { intervalMs, loop = false, mode, durationMs, onComplete }: FrameSequenceOptions,
 ): number {
   const [frameIndex, setFrameIndex] = useState(0)
   const completeRef = useRef(false)
   const onCompleteRef = useRef(onComplete)
+  const pingpongDirRef = useRef<1 | -1>(1)
 
   useEffect(() => {
     onCompleteRef.current = onComplete
@@ -38,10 +42,28 @@ export function useFrameSequence(
       return
     }
 
-    if (loop || durationMs) {
+    const looping = loop || mode === 'loop' || mode === 'pingpong' || !!durationMs
+    if (looping) {
       const id = window.setTimeout(() => {
         if (!completeRef.current) {
-          setFrameIndex((index) => (index + 1) % frameCount)
+          if (mode === 'pingpong') {
+            setFrameIndex((index) => {
+              if (lastIndex === 0) {
+                return 0
+              }
+              let next = index + pingpongDirRef.current
+              if (next > lastIndex) {
+                pingpongDirRef.current = -1
+                next = lastIndex - 1
+              } else if (next < 0) {
+                pingpongDirRef.current = 1
+                next = 1
+              }
+              return next
+            })
+          } else {
+            setFrameIndex((index) => (index + 1) % frameCount)
+          }
         }
       }, intervalMs)
       return () => window.clearTimeout(id)
@@ -64,7 +86,15 @@ export function useFrameSequence(
       onCompleteRef.current?.()
     }, intervalMs)
     return () => window.clearTimeout(id)
-  }, [frameIndex, intervalMs, loop, durationMs, frameCount, lastIndex])
+  }, [
+    frameIndex,
+    intervalMs,
+    loop,
+    mode,
+    durationMs,
+    frameCount,
+    lastIndex,
+  ])
 
   return frameIndex
 }

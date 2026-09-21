@@ -6,6 +6,7 @@ import { Stat } from './components/tabs/Stat/Stat'
 import { Items } from './components/tabs/Items/Items'
 import { Data } from './components/tabs/Data/Data'
 import { Radio } from './components/tabs/Radio/Radio'
+import { RadioProvider } from './components/tabs/Radio/RadioProvider'
 import { Map } from './components/tabs/Map/Map'
 import { HackView } from './components/tabs/Hack/HackView'
 import { StatusBar } from './components/StatusBar/StatusBar'
@@ -50,48 +51,50 @@ function App() {
   }, [booted])
 
   return (
-    <main className="app">
-      <Screen>
-        {!booted ? (
-          <BootSequence
-            frames={BOOT_FRAMES}
-            frameIntervalMs={150}
-            durationMs={6000}
-            onBootComplete={() => setBooted(true)}
-          />
-        ) : (
-          <div className="hud">
-            <TabNav
-              tabs={tabs}
-              activeTab={activeTab}
-              onSelect={setActiveTab}
-              label="Módulos"
+    <RadioProvider>
+      <main className="app">
+        <Screen>
+          {!booted ? (
+            <BootSequence
+              frames={BOOT_FRAMES}
+              frameIntervalMs={150}
+              durationMs={6000}
+              onBootComplete={() => setBooted(true)}
             />
-            <div className="hud__content">
-              {activeTab === 'STAT' ? (
-                <Stat />
-              ) : activeTab === 'ITEMS' ? (
-                <Items />
-              ) : activeTab === 'DATA' ? (
-                <Data />
-              ) : activeTab === 'RADIO' ? (
-                <Radio />
-              ) : activeTab === 'MAP' ? (
-                <Map />
-              ) : activeTab === 'HACK' ? (
-                <HackView />
-              ) : (
-                <div className="placeholder">
-                  <p className="placeholder__title">{activeTab}</p>
-                  <p className="placeholder__subtitle">MÓDULO EN CONSTRUCCIÓN</p>
-                </div>
-              )}
+          ) : (
+            <div className="hud">
+              <TabNav
+                tabs={tabs}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+                label="Módulos"
+              />
+              <div className="hud__content">
+                {activeTab === 'STAT' ? (
+                  <Stat />
+                ) : activeTab === 'ITEMS' ? (
+                  <Items />
+                ) : activeTab === 'DATA' ? (
+                  <Data />
+                ) : activeTab === 'RADIO' ? (
+                  <Radio />
+                ) : activeTab === 'MAP' ? (
+                  <Map />
+                ) : activeTab === 'HACK' ? (
+                  <HackView />
+                ) : (
+                  <div className="placeholder">
+                    <p className="placeholder__title">{activeTab}</p>
+                    <p className="placeholder__subtitle">MÓDULO EN CONSTRUCCIÓN</p>
+                  </div>
+                )}
+              </div>
+              <StatusBar />
             </div>
-            <StatusBar />
-          </div>
-        )}
-      </Screen>
-    </main>
+          )}
+        </Screen>
+      </main>
+    </RadioProvider>
   )
 }
 

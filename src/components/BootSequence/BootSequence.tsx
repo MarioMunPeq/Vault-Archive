@@ -17,6 +17,7 @@ export function BootSequence({
 }: BootSequenceProps) {
   const frameIndex = useFrameSequence(frames.length, {
     intervalMs: frameIntervalMs,
+    mode: 'pingpong',
     durationMs,
     onComplete: onBootComplete,
   })

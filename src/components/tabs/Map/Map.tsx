@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { MAP_LOCATIONS } from '../../../data/mapLocations'
+import { MAP_CENTER, MAP_LOCATIONS } from '../../../data/mapLocations'
 import type { MapCategory, MapLocation } from '../../../data/mapLocations'
 import { LocationPanel } from './LocationPanel'
 import studyIcon from '../../../assets/icons/map/graduate-cap.svg?raw'
@@ -24,7 +24,10 @@ function markerHtml(location: MapLocation): HTMLDivElement {
   wrapper.setAttribute('aria-label', location.nombre)
   wrapper.innerHTML = `
     <div class="map-marker__pin">
-      <span class="map-marker__icon">${CATEGORY_ICONS[location.categoria]}</span>
+      <div class="map-marker__head">
+        <span class="map-marker__icon">${CATEGORY_ICONS[location.categoria]}</span>
+      </div>
+      <div class="map-marker__tip" aria-hidden="true"></div>
     </div>
   `
   return wrapper
@@ -47,10 +50,17 @@ export function Map() {
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: MAPBOX_STYLE_URL as string,
-      // PARCHE TEMPORAL: se desactiva TODA forma de cambiar el zoom para evitar
-      // el bug de desalineación de los marcadores al hacer zoom. Reactivar el
-      // zoom cuando se investigue y resuelva la causa raíz del bug de
-      // reposicionamiento.
+      // Cámara cercana fija y SIN zoom: todas las interacciones de zoom quedan
+      // bloqueadas porque, al hacer zoom, los marcadores se desalinean (bug de
+      // este proyecto). La vista queda clavada en este nivel.
+      center: MAP_CENTER,
+      zoom: 15,
+      // Vista siempre cenital: sin pitch ni bearing inicial y sin giro/rotación
+      // que pueda inclinar la cámara en 3D.
+      pitch: 0,
+      bearing: 0,
+      pitchWithRotate: false,
+      dragRotate: false,
       dragPan: true,
       scrollZoom: false,
       boxZoom: false,
@@ -59,21 +69,14 @@ export function Map() {
       attributionControl: false,
     })
 
-    // Encuadre inicial automático: caja que contiene las 6 coordenadas de
-    // MAP_LOCATIONS para que la ciudad y todos los marcadores sean visibles.
-    const bounds = new mapboxgl.LngLatBounds()
-    for (const location of MAP_LOCATIONS) {
-      bounds.extend([location.lng, location.lat])
-    }
-
-    map.on('load', () => {
-      map.fitBounds(bounds, { padding: 80, maxZoom: 14 })
-    })
+    // Sin fitBounds: encuadrar las 6 coordenadas obligaría a alejar la cámara
+    // hasta caber todo el conjunto (≈7,5 km de norte a sur). Queremos una
+    // vista fija más cercana, así que la cámara es la del constructor.
 
     for (const location of MAP_LOCATIONS) {
       const element = markerHtml(location)
       element.addEventListener('click', () => setSelectedLocation(location))
-      new mapboxgl.Marker({ element })
+      new mapboxgl.Marker({ element, anchor: 'bottom' })
         .setLngLat([location.lng, location.lat])
         .addTo(map)
     }
