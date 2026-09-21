@@ -108,80 +108,83 @@ export function Radio() {
 
   return (
     <div className="radio">
-      <div className="radio__dial">
-        <p className="radio__dial-title">SINTONIZADOR</p>
+      <aside className="radio__panel">
+        <div className="radio__dial">
+          <p className="radio__dial-title">SINTONIZADOR</p>
 
-        <div className="radio__knob-wrap">
-          <div className="radio__knob" />
-          <div
-            className="radio__knob-hand"
-            style={{ '--knob-angle': `${stationIndex * 140}deg` } as CSSProperties}
-          />
-          <span className="radio__knob-mark radio__knob-mark--a">A</span>
-          <span className="radio__knob-mark radio__knob-mark--b">B</span>
-        </div>
+          <div className="radio__knob-wrap">
+            <div className="radio__knob" />
+            <div
+              className="radio__knob-hand"
+              style={{ '--knob-angle': `${stationIndex * 140}deg` } as CSSProperties}
+            />
+            <span className="radio__knob-mark radio__knob-mark--a">A</span>
+            <span className="radio__knob-mark radio__knob-mark--b">B</span>
+          </div>
 
-        <p className="radio__freq" aria-live="polite">
-          {showFrequency}
-          <span className="radio__freq-unit">MHz</span>
-        </p>
+          <p className="radio__freq" aria-live="polite">
+            {showFrequency}
+            <span className="radio__freq-unit">MHz</span>
+          </p>
 
-        <div className="radio__scan">
-          <button
-            type="button"
-            className="radio__scan-btn"
-            onClick={() => changeStation(stationIndex - 1)}
-            aria-label="Emisora anterior"
-          >
-            ◀
-          </button>
-          <span className="radio__scan-label">BUSCAR</span>
-          <button
-            type="button"
-            className="radio__scan-btn"
-            onClick={() => changeStation(stationIndex + 1)}
-            aria-label="Emisora siguiente"
-          >
-            ▶
-          </button>
-        </div>
-
-        <div className="radio__presets">
-          {RADIO_STATIONS.map((preset, index) => (
+          <div className="radio__scan">
             <button
-              key={preset.id}
               type="button"
-              className={[
-                'radio__preset',
-                index === stationIndex ? 'radio__preset--active' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => changeStation(index)}
+              className="radio__scan-btn"
+              onClick={() => changeStation(stationIndex - 1)}
+              aria-label="Emisora anterior"
             >
-              <span className="radio__preset-key">{String.fromCharCode(65 + index)}</span>
-              <span className="radio__preset-name">{preset.name}</span>
+              ◀
             </button>
-          ))}
+            <span className="radio__scan-label">BUSCAR</span>
+            <button
+              type="button"
+              className="radio__scan-btn"
+              onClick={() => changeStation(stationIndex + 1)}
+              aria-label="Emisora siguiente"
+            >
+              ▶
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="radio__display">
-        <div className="radio__band">
-          <p className="radio__band-name">{station.name}</p>
-          <p className="radio__band-tagline">{station.tagline}</p>
+        <div className="radio__list">
+          <p className="radio__list-title">EMISORAS</p>
+          {RADIO_STATIONS.map((preset, index) => {
+            const active = index === stationIndex
+            const offAir = preset.tracks.length === 0
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                className={[
+                  'radio__station',
+                  active ? 'radio__station--active' : '',
+                  offAir ? 'radio__station--offair' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() => changeStation(index)}
+              >
+                <span className="radio__station-mark" aria-hidden="true" />
+                <span className="radio__station-name">{preset.name}</span>
+              </button>
+            )
+          })}
         </div>
+      </aside>
 
+      <section className="radio__display">
         <div className="radio__stage">
           {track ? (
             <>
               <div className="radio__now">
-                <div className="radio__now-name">
+                <span className="radio__now-name">
                   <span className="radio__track-icon" aria-hidden="true">
                     {isPlaying ? '♪' : '…'}
                   </span>
                   {track.name}
-                </div>
+                </span>
                 <span className="radio__now-times">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
@@ -197,33 +200,6 @@ export function Radio() {
                 onChange={(event) => seek(Number(event.target.value))}
                 aria-label="Posición de la pista"
               />
-
-              <div className="radio__transport">
-                <button
-                  type="button"
-                  className="radio__transport-btn"
-                  onClick={() => changeTrack(-1)}
-                  aria-label="Pista anterior"
-                >
-                  ⟨⟨
-                </button>
-                <button
-                  type="button"
-                  className="radio__transport-btn radio__transport-btn--play"
-                  onClick={togglePlay}
-                  aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
-                >
-                  {isPlaying ? '││' : '▶'}
-                </button>
-                <button
-                  type="button"
-                  className="radio__transport-btn"
-                  onClick={() => changeTrack(1)}
-                  aria-label="Pista siguiente"
-                >
-                  ⟩⟩
-                </button>
-              </div>
             </>
           ) : (
             <div className="radio__missing">
@@ -238,6 +214,33 @@ export function Radio() {
           )}
 
           <RadioScope audioRef={audioRef} isPlaying={isPlaying} />
+
+          <div className="radio__transport">
+            <button
+              type="button"
+              className="radio__transport-btn"
+              onClick={() => changeTrack(-1)}
+              aria-label="Pista anterior"
+            >
+              ⟨⟨
+            </button>
+            <button
+              type="button"
+              className="radio__transport-btn radio__transport-btn--play"
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
+            >
+              {isPlaying ? '││' : '▶'}
+            </button>
+            <button
+              type="button"
+              className="radio__transport-btn"
+              onClick={() => changeTrack(1)}
+              aria-label="Pista siguiente"
+            >
+              ⟩⟩
+            </button>
+          </div>
 
           <div className="radio__volume">
             <span className="radio__volume-label">VOL</span>
@@ -276,7 +279,7 @@ export function Radio() {
           onEnded={() => changeTrack(1)}
           onError={() => setIsPlaying(false)}
         />
-      </div>
+      </section>
     </div>
   )
 }

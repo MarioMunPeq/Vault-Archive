@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { MAP_CENTER, MAP_LOCATIONS } from '../../../data/mapLocations'
+import { MAP_LOCATIONS } from '../../../data/mapLocations'
 import type { MapCategory, MapLocation } from '../../../data/mapLocations'
+import { LocationPanel } from './LocationPanel'
 import studyIcon from '../../../assets/icons/map/graduate-cap.svg?raw'
 import workIcon from '../../../assets/icons/map/briefcase.svg?raw'
 import './Map.css'
@@ -31,7 +32,9 @@ function markerHtml(location: MapLocation): HTMLDivElement {
 
 export function Map() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const popupRef = useRef<mapboxgl.Popup | null>(null)
+  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(
+    null,
+  )
 
   const configured = Boolean(MAPBOX_TOKEN && MAPBOX_STYLE_URL)
 
@@ -44,41 +47,36 @@ export function Map() {
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: MAPBOX_STYLE_URL as string,
-      center: MAP_CENTER,
-      zoom: 13,
+      // PARCHE TEMPORAL: se desactiva TODA forma de cambiar el zoom para evitar
+      // el bug de desalineación de los marcadores al hacer zoom. Reactivar el
+      // zoom cuando se investigue y resuelva la causa raíz del bug de
+      // reposicionamiento.
+      dragPan: true,
+      scrollZoom: false,
+      boxZoom: false,
+      doubleClickZoom: false,
+      touchZoomRotate: false,
       attributionControl: false,
     })
 
-    const openPopup = (location: MapLocation) => {
-      if (popupRef.current) popupRef.current.remove()
-      popupRef.current = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: true,
-        offset: 18,
-        className: 'map-popup',
-      })
-        .setLngLat([location.lng, location.lat])
-        .setHTML(
-          `<p class="map-popup__name">${location.nombre}</p>` +
-            `<p class="map-popup__desc">${location.descripcion}</p>`,
-        )
-        .addTo(map)
+    // Encuadre inicial automático: caja que contiene las 6 coordenadas de
+    // MAP_LOCATIONS para que la ciudad y todos los marcadores sean visibles.
+    const bounds = new mapboxgl.LngLatBounds()
+    for (const location of MAP_LOCATIONS) {
+      bounds.extend([location.lng, location.lat])
     }
+
+    map.on('load', () => {
+      map.fitBounds(bounds, { padding: 80, maxZoom: 14 })
+    })
 
     for (const location of MAP_LOCATIONS) {
       const element = markerHtml(location)
-      element.addEventListener('click', () => openPopup(location))
+      element.addEventListener('click', () => setSelectedLocation(location))
       new mapboxgl.Marker({ element })
         .setLngLat([location.lng, location.lat])
         .addTo(map)
     }
-
-    map.on('click', () => {
-      if (popupRef.current) {
-        popupRef.current.remove()
-        popupRef.current = null
-      }
-    })
 
     return () => {
       map.remove()
@@ -96,5 +94,14 @@ export function Map() {
     )
   }
 
-  return <div ref={containerRef} className="map" />
+  return (
+    <div ref={containerRef} className="map">
+      {selectedLocation ? (
+        <LocationPanel
+          location={selectedLocation}
+          onClose={() => setSelectedLocation(null)}
+        />
+      ) : null}
+    </div>
+  )
 }

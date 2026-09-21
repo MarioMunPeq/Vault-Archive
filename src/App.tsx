@@ -55,7 +55,8 @@ function App() {
         {!booted ? (
           <BootSequence
             frames={BOOT_FRAMES}
-            frameIntervalMs={750}
+            frameIntervalMs={150}
+            durationMs={6000}
             onBootComplete={() => setBooted(true)}
           />
         ) : (

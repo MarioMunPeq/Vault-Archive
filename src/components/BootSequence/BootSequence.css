@@ -7,7 +7,7 @@
 
 .boot-sequence__frame {
   display: block;
-  max-width: 75%;
-  max-height: 80%;
+  width: min(75%, calc((100vh * 86) / 122));
+  height: auto;
   object-fit: contain;
 }
