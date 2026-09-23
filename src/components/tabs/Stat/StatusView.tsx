@@ -177,14 +177,15 @@ const CONDITIONS: readonly ConditionItem[] = [
 export function StatusView() {
   return (
     <div className="status">
-      <header className="status__header">
-        <div className="status__identity">
-          <p className="status__name">Mario Muñoz Pequeño</p>
-          <p className="status__class">CLASS: Software Developer</p>
-        </div>
-      </header>
+      <div className="status__content-block">
+        <header className="status__header">
+          <div className="status__identity">
+            <p className="status__name">Mario Muñoz Pequeño</p>
+            <p className="status__class">CLASS: Software Developer</p>
+          </div>
+        </header>
 
-      <main className="status__main">
+        <main className="status__main">
         <section className="status__special" aria-label="Atributos S.P.E.C.I.A.L.">
           <h2 className="status__special-title">S.P.E.C.I.A.L.</h2>
           <div className="special-grid">
@@ -274,6 +275,7 @@ export function StatusView() {
           ))}
         </div>
       </main>
+      </div>
 
       <footer className="status__footer">
         <div className="status__stats">

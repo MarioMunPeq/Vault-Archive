@@ -21,7 +21,7 @@ import {
   createGame,
   parseLineTokens,
 } from './hackGame'
-import type { BoardLine, Game, LineToken } from './hackGame'
+import type { BoardLine, Game } from './hackGame'
 import type { DifficultyId } from './hackTypes'
 import { getBucketsSync, loadDictionary } from './words'
 import './HackView.css'
@@ -166,13 +166,6 @@ const renderLine = (line: BoardLine) => {
     const lineKey = `${line.column}-${line.row}`
     const content = line.content
 
-    const charTokenMap: Map<number, { token: LineToken; isFirst: boolean }> = new Map()
-    tokens.forEach((token) => {
-      for (let i = token.start; i < token.end; i++) {
-        charTokenMap.set(i, { token, isFirst: i === token.start })
-      }
-    })
-
     const handleInvalidClick = () => {
       if (!game || game.phase !== 'playing') return
       const next = applyInvalidSelection(game)
@@ -181,147 +174,102 @@ const renderLine = (line: BoardLine) => {
     }
 
     const chars: ReactNode[] = []
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i]
-      const tokenInfo = charTokenMap.get(i)
-      const charKey = `${lineKey}-${i}`
+    let cursor = 0
 
-      if (tokenInfo) {
-        const { token, isFirst } = tokenInfo
-        const isDud = token.kind === 'dud'
-        const dudUsed = game ? game.usedDuds.has(token.id) : false
+    tokens.forEach((token, tokenIndex) => {
+      const isDud = token.kind === 'dud'
+      const dudUsed = game ? game.usedDuds.has(token.id) : false
 
-        if (isDud && dudUsed) {
+      if (token.start > cursor) {
+        const noiseText = content.slice(cursor, token.start)
+        for (let i = 0; i < noiseText.length; i++) {
           chars.push(
             <span
-              key={charKey}
-              className="hack-token hack-token--dud hack-token--dud--used hack-char"
-              data-token-id={token.id}
-              data-char-index={i - token.start}
-              data-token-start={token.start}
-              data-token-end={token.end}
+              key={`${lineKey}-noise-${cursor + i}`}
+              className="hack-char hack-char--noise"
+              onClick={handleInvalidClick}
             >
-              {char}
+              {noiseText[i]}
             </span>,
           )
-        } else if (isDud) {
-          const struck = false
+        }
+      }
+
+      const tokenText = content.slice(token.start, token.end)
+      const tokenKey = `${lineKey}-token-${tokenIndex}`
+
+      if (isDud && dudUsed) {
+        chars.push(
+          <span
+            key={tokenKey}
+            className="hack-token hack-token--dud hack-token--dud--used"
+            data-token-id={token.id}
+            data-token-start={token.start}
+            data-token-end={token.end}
+          >
+            {tokenText}
+          </span>,
+        )
+      } else if (isDud) {
+        chars.push(
+          <span
+            key={tokenKey}
+            className="hack-token hack-token--dud"
+            data-token-id={token.id}
+            data-token-start={token.start}
+            data-token-end={token.end}
+            onClick={() => handleDud(token.id)}
+          >
+            {tokenText}
+          </span>,
+        )
+      } else {
+        const wordIndex = token.wordIndex as number
+        const removed = game ? game.removed.has(wordIndex) : false
+        const struck = game ? game.struck.has(wordIndex) : false
+        const displayText = struck ? '.'.repeat(tokenText.length) : tokenText
+
+        if (removed) {
           chars.push(
             <span
-              key={charKey}
-              className={`hack-token hack-token--dud hack-char${isFirst ? ' hack-token--first-char' : ''}${struck ? ' hack-token--struck' : ''}`}
+              key={tokenKey}
+              className="hack-token hack-token--word"
               data-token-id={token.id}
-              data-char-index={i - token.start}
               data-token-start={token.start}
               data-token-end={token.end}
-onMouseEnter={(_e) => {
-                  if (isFirst) {
-                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
-                      (el as HTMLElement).dataset.hovered = 'true'
-                    })
-                  } else {
-                    const target = _e.currentTarget as HTMLElement
-                    target.dataset.hovered = 'true'
-                  }
-                }}
-                onMouseLeave={(_e) => {
-                  if (isFirst) {
-                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
-                      delete (el as HTMLElement).dataset.hovered
-                    })
-                  } else {
-                    const target = _e.currentTarget as HTMLElement
-                    delete target.dataset.hovered
-                  }
-                }}
-                onClick={() => {
-                if (isFirst) {
-                  handleDud(token.id)
-                } else {
-                  handleInvalidClick()
-                }
-              }}
             >
-              {char}
+              {displayText}
             </span>,
           )
         } else {
-          const wordIndex = token.wordIndex as number
-          const removed = game ? game.removed.has(wordIndex) : false
-          const struck = game ? game.struck.has(wordIndex) : false
-
-          if (removed) {
-            chars.push(
-              <span
-                key={charKey}
-                className="hack-token hack-token--word hack-char"
-                data-token-id={token.id}
-                data-char-index={i - token.start}
-                data-token-start={token.start}
-                data-token-end={token.end}
-              >
-                {char}
-              </span>,
-            )
-          } else {
-            const displayChar = struck ? '.' : char
-            chars.push(
-              <span
-                key={charKey}
-                className={`hack-token hack-token--word hack-char${isFirst ? ' hack-token--first-char' : ''}${struck ? ' hack-token--struck' : ''}`}
-                data-token-id={token.id}
-                data-char-index={i - token.start}
-                data-token-start={token.start}
-                data-token-end={token.end}
-                onMouseEnter={(_e) => {
-                  if (isFirst) {
-                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
-                      (el as HTMLElement).dataset.hovered = 'true'
-                    })
-                  } else {
-                    const target = _e.currentTarget as HTMLElement
-                    target.dataset.hovered = 'true'
-                  }
-                }}
-                onMouseLeave={(_e) => {
-                  if (isFirst) {
-                    document.querySelectorAll(`[data-token-id="${token.id}"]`).forEach((el) => {
-                      delete (el as HTMLElement).dataset.hovered
-                    })
-                  } else {
-                    const target = _e.currentTarget as HTMLElement
-                    delete target.dataset.hovered
-                  }
-                }}
-                onClick={() => {
-                  if (isFirst) {
-                    handleGuess(wordIndex)
-                  } else {
-                    handleInvalidClick()
-                  }
-                }}
-              >
-                {displayChar}
-              </span>,
-            )
-          }
+          chars.push(
+            <span
+              key={tokenKey}
+              className={`hack-token hack-token--word${struck ? ' hack-token--struck' : ''}`}
+              data-token-id={token.id}
+              data-token-start={token.start}
+              data-token-end={token.end}
+              onClick={() => handleGuess(wordIndex)}
+            >
+              {displayText}
+            </span>,
+          )
         }
-      } else {
+      }
+
+      cursor = token.end
+    })
+
+    if (cursor < content.length) {
+      const noiseText = content.slice(cursor)
+      for (let i = 0; i < noiseText.length; i++) {
         chars.push(
           <span
-            key={charKey}
+            key={`${lineKey}-noise-${cursor + i}`}
             className="hack-char hack-char--noise"
-            onMouseEnter={(_e) => {
-              const target = _e.currentTarget as HTMLElement
-              target.dataset.hovered = 'true'
-            }}
-            onMouseLeave={(_e) => {
-              const target = _e.currentTarget as HTMLElement
-              delete target.dataset.hovered
-            }}
             onClick={handleInvalidClick}
           >
-            {char}
+            {noiseText[i]}
           </span>,
         )
       }

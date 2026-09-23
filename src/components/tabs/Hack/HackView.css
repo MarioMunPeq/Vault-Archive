@@ -139,14 +139,42 @@
   white-space: pre;
 }
 
+.hack-token {
+  display: inline-block;
+  padding: 0 1px;
+  line-height: inherit;
+  cursor: pointer;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 5px var(--pipboy-color-glow);
+}
+
+.hack-token:hover {
+  background: var(--pipboy-color);
+  color: var(--screen-bg);
+  text-shadow: 0 0 8px var(--pipboy-color-glow);
+}
+
+.hack-token.hack-token--dud--used,
+.hack-token.hack-token--dud--used:hover {
+  color: var(--pipboy-color-faint);
+  text-shadow: none;
+  background: transparent;
+  cursor: default;
+}
+
 .hack-char {
   display: inline-block;
   padding: 0 1px;
   line-height: inherit;
   cursor: pointer;
-  background: #f0fff0;
+  color: var(--pipboy-color);
+  text-shadow: 0 0 5px var(--pipboy-color-glow);
+}
+
+.hack-char:hover {
+  background: var(--pipboy-color);
   color: var(--screen-bg);
-  text-shadow: none;
+  text-shadow: 0 0 8px var(--pipboy-color-glow);
 }
 
 .hack-char--noise {
@@ -154,36 +182,14 @@
 }
 
 .hack-token--word {
-  color: var(--screen-bg);
   text-shadow: none;
 }
 
 .hack-token--dud {
-  color: var(--screen-bg);
   text-shadow: none;
-}
-
-.hack-token--dud--used {
-  color: var(--pipboy-color-faint);
-  text-shadow: none;
-  background: transparent;
-  cursor: default;
 }
 
 .hack-token--struck {
-  color: var(--pipboy-color-faint);
-  text-shadow: none;
-}
-
-.hack-char[data-hovered="true"] {
-  background: var(--pipboy-color);
-  color: var(--screen-bg);
-  text-shadow: 0 0 5px var(--pipboy-color-glow);
-}
-
-.hack-token--dud--used[data-hovered="true"],
-.hack-token--dud--used .hack-char[data-hovered="true"] {
-  background: transparent;
   color: var(--pipboy-color-faint);
   text-shadow: none;
 }

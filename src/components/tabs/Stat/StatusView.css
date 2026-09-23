@@ -1,13 +1,21 @@
 .status {
   position: relative;
   height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto auto;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 16px 24px;
   gap: 16px;
   font-family: var(--font-pipboy);
   color: var(--pipboy-color);
+}
+
+/* Content block (header + main) centered vertically as a unit */
+.status__content-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
 }
 
 /* ---------- Header - centered identity ---------- */
@@ -218,8 +226,9 @@
   white-space: nowrap;
 }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer - pinned to bottom ---------- */
 .status__footer {
+  margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--pipboy-color-deep);
 }
@@ -259,7 +268,6 @@
 /* Responsive: stack on smaller viewports */
 @media (max-width: 900px) {
   .status {
-    grid-template-rows: auto 1fr auto auto;
     padding: 12px 16px;
     gap: 12px;
   }
@@ -404,31 +412,31 @@
 
   .status-condition {
     padding: 5px 7px;
-    min-width: 55px.
+    min-width: 55px;
   }
 
   .status-condition__icon {
-    width: clamp(26px, 4.5vh, 44px).
-    height: clamp(26px, 4.5vh, 44px).
+    width: clamp(26px, 4.5vh, 44px);
+    height: clamp(26px, 4.5vh, 44px);
   }
 
   .status-condition__label {
-    font-size: clamp(0.32rem, 0.8vw, 0.45rem).
+    font-size: clamp(0.32rem, 0.8vw, 0.45rem);
   }
 
   .status-condition__value {
-    font-size: clamp(0.45rem, 1vw, 0.65rem).
+    font-size: clamp(0.45rem, 1vw, 0.65rem);
   }
 
   .status__stat {
-    padding: 5px 4px.
+    padding: 5px 4px;
   }
 
   .status__stat-label {
-    font-size: clamp(0.4rem, 0.9vw, 0.5rem).
+    font-size: clamp(0.4rem, 0.9vw, 0.5rem);
   }
 
   .status__stat-value {
-    font-size: clamp(0.7rem, 1.6vw, 0.9rem).
+    font-size: clamp(0.7rem, 1.6vw, 0.9rem);
   }
 }
